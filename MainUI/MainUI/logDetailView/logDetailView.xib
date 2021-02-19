@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14490.70"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="logDetailView">
+            <connections>
+                <outlet property="tabBar" destination="FOF-ml-ruk" id="a2b-eN-Skz"/>
+                <outlet property="tabView" destination="1lI-2X-QyB" id="vDy-jy-PTt"/>
+                <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="Hz6-mo-xeY">
+            <rect key="frame" x="0.0" y="0.0" width="1000" height="500"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FOF-ml-ruk" customClass="MMTabBarView">
+                    <rect key="frame" x="0.0" y="478" width="1000" height="22"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                    <connections>
+                        <outlet property="delegate" destination="-2" id="w1r-VT-cVQ"/>
+                        <outlet property="partnerView" destination="1lI-2X-QyB" id="Lqc-AL-Ksp"/>
+                        <outlet property="tabView" destination="1lI-2X-QyB" id="HjI-VF-AaJ"/>
+                    </connections>
+                </customView>
+                <tabView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1lI-2X-QyB">
+                    <rect key="frame" x="0.0" y="-2" width="1000" height="478"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                    <font key="font" metaFont="system"/>
+                    <connections>
+                        <outlet property="delegate" destination="FOF-ml-ruk" id="tDa-iN-Ker"/>
+                    </connections>
+                </tabView>
+            </subviews>
+            <point key="canvasLocation" x="168" y="62"/>
+        </customView>
+    </objects>
+</document>
