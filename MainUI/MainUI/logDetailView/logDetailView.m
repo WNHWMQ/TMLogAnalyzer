@@ -38,9 +38,7 @@
     NSTextView *view = [dic valueForKey:@"LogType"];
     NSString *str = [dic valueForKey:@"Content"];
     
-    if ([str isEqualToString:@""] || str == nil) {
-        return;
-    }
+    
     
     NSMutableString * pstr = [[view textStorage] mutableString];
     //    if ([str containsString:@"\n"])
@@ -51,6 +49,12 @@
     //    {
     //        [pstr appendFormat:@"%@\n",str];
     //    }
+    
+    if ([str length] < 1) {
+        [pstr setString:@""];
+        return;
+    }
+    
     [pstr setString:str];
     NSRange range = NSMakeRange([pstr length]-1,0);
     [view scrollRangeToVisible:range];//显示的文本滚动到最后一行

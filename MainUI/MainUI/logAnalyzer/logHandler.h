@@ -24,17 +24,15 @@ NS_ASSUME_NONNULL_BEGIN
     NSString *fileContent;
     NSString *logType;
     NSString *timeTampType;
+    NSMutableArray *arrSubString;
 }
 
-//@property (nonatomic,strong) NSString *filePath;
-//@property (nonatomic,strong) NSString *fileName;
-//@property (nonatomic,strong) NSString *fileContent;
-//@property (nonatomic,strong) NSString *logType;
-//@property (nonatomic,strong) NSString *timeTampType;
-
+- (void)analyzeSequenceLog;
 - (NSMutableArray *)data;
 - (instancetype)initWithFilePath:(NSString *)path andTypeController:(logTypeController *)typeController;
 - (NSString *)getSubString:(NSArray *)arr;
+- (void)initCommonLogSubString:(NSArray *)arr;
+- (void)initSpecialLogSubString:(NSArray *)arr fromStartStr:(NSString *)start_str toEndStr:(NSString *)end_str ignoreOption:(NSArray *)optArr;
 
 @end
 

@@ -8,10 +8,25 @@
 
 #import "logManager.h"
 
-#define pivot                   @"pivot.csv"
-#define FAIL_Summary            @"FAIL_Summary.csv"
+//log file type
+#define pivot           @"pivot.csv"
+#define FAIL_Summary    @"FAIL_Summary.csv"
+#define EngineLog       @"EngineLog.log"
+#define smcLog          @"smcLog.log"
+#define engine          @"engine.log"
+#define flow_plain      @"flow_plain.log"
+#define hw              @"hw.log"
+#define iefi            @"iefi.log"
+#define sequencer       @"sequencer.log"
+#define uart            @"uart.txt"
+#define uart2           @"uart2.txt"
+#define uart3           @"uart3.txt"
+#define power           @"power.log"
+#define efi0_kis        @"efi0-kis.log"
+#define efi0_uart       @"efi0-uart.log"
+#define usbfs           @"usbfs.log"
+
 #define kShowAlertMessageBox    @"kShowAlertMessageBox"
-#define sequencer               @"sequencer.log"
 
 @implementation logManager
 
@@ -20,15 +35,16 @@
     self = [super init];
     if (self) {
         NSString *unzipPath = [self UnzipFile:path];
-        NSArray *arrLogPath;
         logDetailHandlerDic = [[NSMutableDictionary alloc]init];
         logSelectHandlerDic = [[NSMutableDictionary alloc]init];
         logTypeController *typeController = [[logTypeController alloc]init];
+        NSArray *arrLogPath;
+        logHandler *lh;
         
         if (unzipPath) {
             arrLogPath = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:unzipPath error:nil];
             for (int i = 0; i < [arrLogPath count]; i++) {
-                logHandler *lh = [[logHandler alloc] initWithFilePath:[unzipPath stringByAppendingPathComponent:arrLogPath[i]]
+                lh = [[logHandler alloc] initWithFilePath:[unzipPath stringByAppendingPathComponent:arrLogPath[i]]
                                                    andTypeController:typeController];
                 if (lh) {
                     if ([arrLogPath[i] containsString:pivot] || [arrLogPath[i] containsString:FAIL_Summary]) {
@@ -44,11 +60,42 @@
                                      fromPivotData:[(logHandler *)[logSelectHandlerDic valueForKey:pivot] data]];
             
             [logSelectHandlerDic setObject:failRows forKey:@"failRows"];
+            [[logDetailHandlerDic valueForKey:sequencer] analyzeSequenceLog];
+            
+            for (NSString *key in logDetailHandlerDic) {
+                
+//                logHandler *lh_temp = [logDetailHandlerDic valueForKey:key];
+//                NSThread *thread = [[NSThread alloc]initWithTarget:self
+//                                                          selector:@selector(initDetailLogData:)
+//                                                            object:[logDetailHandlerDic valueForKey:key]];
+//                [thread start];
+                
+                logHandler *lh_temp = [logDetailHandlerDic valueForKey:key];
+                if ([key isEqualToString:EngineLog] || [key isEqualToString:engine]) {
+                    [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
+                                        fromStartStr:@"< Received >"
+                                            toEndStr:@"< Result >"
+                                        ignoreOption:@[@"start_test",@"end_test"]];
+                }else if ([key isEqualToString:flow_plain]){
+                    [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
+                                        fromStartStr:@"==Test:"
+                                            toEndStr:lh_temp->timeTampType
+                                        ignoreOption:@[]];
+
+                }else{
+                    [lh_temp initCommonLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]];
+                }
+            }
         }else{
             return nil;
         }
     }
     return self;
+}
+
+- (void)initDetailLogData:(logHandler *)lh
+{
+    [lh initCommonLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]];
 }
 
 //解压 zip log

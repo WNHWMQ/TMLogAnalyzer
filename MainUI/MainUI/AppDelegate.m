@@ -26,7 +26,7 @@
         [[NSDistributedNotificationCenter defaultCenter]addObserver:self selector:@selector(showAlertMessageBox:) name:kShowAlertMessageBox object:nil suspensionBehavior:NSNotificationSuspensionBehaviorDeliverImmediately];
         [[NSDistributedNotificationCenter defaultCenter]addObserver:self selector:@selector(RefreshDetailView:) name:kRefreshDetailView object:nil suspensionBehavior:NSNotificationSuspensionBehaviorDeliverImmediately];
 
-        NSString *zipPath = [[NSString alloc]initWithString:@"/Users/henry/Desktop/TM LOG/MAC FCT/C020362000KPY5X3S_20200902-162204.721491_J457_FCT_FCT_C020362000KPY5X3S_FAIL.zip"];
+        NSString *zipPath = [[NSString alloc]initWithString:@"/Users/henry/Desktop/TM LOG/MAC FCT/C02102200GFPY5L42_20210125-063242.990370_J457_FCT_FCT_C02102200GFPY5L42_FAIL.zip"];
         log_manager = [[logManager alloc] initWithZipPath:zipPath];
     }
     return self;
@@ -121,41 +121,78 @@
         return;
     }
     
+    logHandler *lh;
     NSMutableArray *arr = [[NSMutableArray alloc]init];
-    logHandler *lh = (logHandler *)[log_manager->logDetailHandlerDic valueForKey:sequencer];
-    NSString *start_tp = nil;
-    NSString *end_tp = nil;
-        
+    
+//    logHandler *lh = (logHandler *)[log_manager->logDetailHandlerDic valueForKey:sequencer];
+//        NSString *start_tp = nil;
+//        NSString *end_tp = nil;
+    
+//    int i = 0;
+//    int j = 0;
+//
+//    do {
+//        j = i + 1;
+//
+//        if (j == [indexs count]) {
+//            start_tp = ((SequenceGroup *)[lh data][[indexs[i] intValue]])->startTime;
+//            end_tp = ((SequenceGroup *)[lh data][[indexs[i] intValue]])->endTime;
+//            [arr addObject:@[start_tp,end_tp]];
+//            break;
+//        }
+//
+//        start_tp = ((SequenceGroup *)[lh data][[indexs[i] intValue]])->startTime;
+//        while ([indexs[j] intValue] - [indexs[j-1] intValue] == 1) {
+//            end_tp = ((SequenceGroup *)[lh data][[indexs[j] intValue]])->endTime;;
+//            j++;
+//            if (j == [indexs count]) {
+//                end_tp = ((SequenceGroup *)[lh data][[indexs[j-1] intValue]])->endTime;;
+//                break;
+//            }
+//        }
+//
+//        if (i + 1 == j) {
+//            end_tp = ((SequenceGroup *)[lh data][[indexs[i] intValue]])->endTime;;
+//        }
+//        i = j;
+//
+//        [arr addObject:@[start_tp,end_tp]];
+//    } while (i < [indexs count] && j < [indexs count]);
+    
     int i = 0;
     int j = 0;
+    
+    NSString *start_tp = nil;
+    NSString *end_tp = nil;
     
     do {
         j = i + 1;
         
         if (j == [indexs count]) {
-            start_tp = ((SequenceGroup *)[lh data][[indexs[i] intValue]])->startTime;
-            end_tp = ((SequenceGroup *)[lh data][[indexs[i] intValue]])->endTime;
+            start_tp = indexs[i];
+            end_tp = indexs[i];
             [arr addObject:@[start_tp,end_tp]];
             break;
         }
         
-        start_tp = ((SequenceGroup *)[lh data][[indexs[i] intValue]])->startTime;
+        start_tp = indexs[i];
         while ([indexs[j] intValue] - [indexs[j-1] intValue] == 1) {
-            end_tp = ((SequenceGroup *)[lh data][[indexs[j] intValue]])->endTime;;
+            end_tp = indexs[j];
             j++;
             if (j == [indexs count]) {
-                end_tp = ((SequenceGroup *)[lh data][[indexs[j-1] intValue]])->endTime;;
+                end_tp = indexs[j-1];
                 break;
             }
         }
         
         if (i + 1 == j) {
-            end_tp = ((SequenceGroup *)[lh data][[indexs[i] intValue]])->endTime;;
+            end_tp = indexs[i];
         }
         i = j;
         
         [arr addObject:@[start_tp,end_tp]];
     } while (i < [indexs count] && j < [indexs count]);
+
     
     for (NSString *key in log_manager->logDetailHandlerDic) {
         lh = [log_manager->logDetailHandlerDic valueForKey:key];
