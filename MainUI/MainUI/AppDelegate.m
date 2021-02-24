@@ -28,6 +28,8 @@
 
         NSString *zipPath = [[NSString alloc]initWithString:@"/Users/henry/Desktop/TM LOG/MAC FCT/C02102200GFPY5L42_20210125-063242.990370_J457_FCT_FCT_C02102200GFPY5L42_FAIL.zip"];
         log_manager = [[logManager alloc] initWithZipPath:zipPath];
+        
+        [zipPath release];
     }
     return self;
 }
@@ -124,41 +126,6 @@
     logHandler *lh;
     NSMutableArray *arr = [[NSMutableArray alloc]init];
     
-//    logHandler *lh = (logHandler *)[log_manager->logDetailHandlerDic valueForKey:sequencer];
-//        NSString *start_tp = nil;
-//        NSString *end_tp = nil;
-    
-//    int i = 0;
-//    int j = 0;
-//
-//    do {
-//        j = i + 1;
-//
-//        if (j == [indexs count]) {
-//            start_tp = ((SequenceGroup *)[lh data][[indexs[i] intValue]])->startTime;
-//            end_tp = ((SequenceGroup *)[lh data][[indexs[i] intValue]])->endTime;
-//            [arr addObject:@[start_tp,end_tp]];
-//            break;
-//        }
-//
-//        start_tp = ((SequenceGroup *)[lh data][[indexs[i] intValue]])->startTime;
-//        while ([indexs[j] intValue] - [indexs[j-1] intValue] == 1) {
-//            end_tp = ((SequenceGroup *)[lh data][[indexs[j] intValue]])->endTime;;
-//            j++;
-//            if (j == [indexs count]) {
-//                end_tp = ((SequenceGroup *)[lh data][[indexs[j-1] intValue]])->endTime;;
-//                break;
-//            }
-//        }
-//
-//        if (i + 1 == j) {
-//            end_tp = ((SequenceGroup *)[lh data][[indexs[i] intValue]])->endTime;;
-//        }
-//        i = j;
-//
-//        [arr addObject:@[start_tp,end_tp]];
-//    } while (i < [indexs count] && j < [indexs count]);
-    
     int i = 0;
     int j = 0;
     
@@ -198,6 +165,16 @@
         lh = [log_manager->logDetailHandlerDic valueForKey:key];
         [logDetailViewController RefreshLogView:lh->logType withContent:[lh getSubString:arr]];
     }
+    
+    
+    for (int i = 0; i < [arr count]; i++) {
+        for (int j = 0; j < [arr[i] count]; j++) {
+            [arr[i] setString:@""];
+            [arr[i] release];
+        }
+    }
+    
+    [arr release];
 }
 
 //根据Table所选,刷新Log内容

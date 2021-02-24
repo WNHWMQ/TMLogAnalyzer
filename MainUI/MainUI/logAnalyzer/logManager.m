@@ -38,7 +38,7 @@
         logDetailHandlerDic = [[NSMutableDictionary alloc]init];
         logSelectHandlerDic = [[NSMutableDictionary alloc]init];
         logTypeController *typeController = [[logTypeController alloc]init];
-        NSArray *arrLogPath;
+        NSArray *arrLogPath = nil;
         logHandler *lh;
         
         if (unzipPath) {
@@ -62,6 +62,8 @@
             [logSelectHandlerDic setObject:failRows forKey:@"failRows"];
             [[logDetailHandlerDic valueForKey:sequencer] analyzeSequenceLog];
             
+            logHandler *lh_temp;
+            
             for (NSString *key in logDetailHandlerDic) {
                 
 //                logHandler *lh_temp = [logDetailHandlerDic valueForKey:key];
@@ -70,22 +72,25 @@
 //                                                            object:[logDetailHandlerDic valueForKey:key]];
 //                [thread start];
                 
-                logHandler *lh_temp = [logDetailHandlerDic valueForKey:key];
-                if ([key isEqualToString:EngineLog] || [key isEqualToString:engine]) {
-                    [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
-                                        fromStartStr:@"< Received >"
-                                            toEndStr:@"< Result >"
-                                        ignoreOption:@[@"start_test",@"end_test"]];
-                }else if ([key isEqualToString:flow_plain]){
-                    [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
-                                        fromStartStr:@"==Test:"
-                                            toEndStr:lh_temp->timeTampType
-                                        ignoreOption:@[]];
+                lh_temp = [logDetailHandlerDic valueForKey:key];
+//                dispatch_async(dispatch_get_main_queue(), ^{
+                    if ([key isEqualToString:EngineLog] || [key isEqualToString:engine]) {
+                        [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
+                                            fromStartStr:@"< Received >"
+                                                toEndStr:@"< Result >"
+                                            ignoreOption:@[@"start_test",@"end_test"]];
+                    }else if ([key isEqualToString:flow_plain]){
+                        [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
+                                            fromStartStr:@"==Test:"
+                                                toEndStr:lh_temp->timeTampType
+                                            ignoreOption:@[]];
 
-                }else{
-                    [lh_temp initCommonLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]];
-                }
+                    }else{
+                        [lh_temp initCommonLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]];
+                    }
+//                });
             }
+            
         }else{
             return nil;
         }

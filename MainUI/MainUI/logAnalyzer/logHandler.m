@@ -79,94 +79,138 @@
         NSLog(@"Can't analyze other file without sequencer.log!");
         return;
     }
+    
+    NSUInteger length;
+    NSUInteger location = 0;
+    NSString *subString = nil;
+    NSString *line = nil;
+    NSMutableString *groupStr = nil;
+    int add_len = 0;
+    NSString *line_break = nil;
+    BOOL firstFilterFlag = YES;
+    
+    
     NSArray *arrGroup = [fileContent componentsMatchedByRegex:[NSString stringWithFormat:@"%@.+running test",timeTampType]];
+    if ([arrGroup count] < 1) {
+        NSLog(@"Analyze sequence log error without running test!");
+        return;
+    }
+    
     data = [[NSMutableArray alloc]init];
+    length = [fileContent length];
     
-    for (int i = 0; i < [arrGroup count] - 1; i++) {
-        NSString *begin = arrGroup[i];
-        if ( (i+1) < [arrGroup count]) {
-            NSString *end = arrGroup[i+1];
-            NSString *regex = [NSString stringWithFormat:@"(%@[\\s|\\S]*%@)",begin,end];
-            NSString *groupStr = [[fileContent stringByMatching:regex]stringByMatching:@"([\\s|\\S]*\n)"];
-            [data addObject:[[SequenceGroup alloc]initWithGroupStr:groupStr]];
+    NSString *regex = [NSString stringWithFormat:@"([\\s|\\S]*%@)",[fileContent stringByMatching:arrGroup[0]]];
+    location = [[[fileContent stringByMatching:regex]stringByMatching:@"([\\s|\\S]*\n)"] length];
+    
+    @autoreleasepool {
+        for (int i = 0; i < [arrGroup count]; i++) {
+            
+            groupStr = [[NSMutableString alloc]init];
+            
+            while (location < length) {
+                
+                subString = [fileContent substringFromIndex:location];
+                line = [subString stringByMatching:@".*"];
+                
+                if (([subString length] >= [line length] + 2) && [[subString substringToIndex:[line length]+2] containsString:[NSString stringWithFormat:@"%@\r\n",line]]){
+                    //            [line appendString:@"\r\n"];
+                    add_len = 2;
+                    line_break = @"\r\n";
+                }else if (([subString length] >= [line length] + 1) && [[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\n",line]]){
+                    //            [line appendString:@"\n"];
+                    add_len = 1;
+                    line_break = @"\n";
+                }else if (([subString length] >= [line length] + 1) && [[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\r",line]]){
+                    //            [line appendString:@"\r"];
+                    add_len = 1;
+                    line_break = @"\r";
+                }
+                
+                if ([line containsString:arrGroup[i]]) {
+                    if (firstFilterFlag) {
+                        firstFilterFlag = NO;
+                    }else{
+                        [data addObject:[[SequenceGroup alloc]initWithGroupStr:groupStr]];
+                        [groupStr setString:@""];
+                    }
+                    break;
+                    
+                }else{
+                    [groupStr appendFormat:@"%@%@",line,line_break];
+                }
+                
+                location = location + [line length] + add_len;
+            }
         }
+        [data addObject:[[SequenceGroup alloc]initWithGroupStr:subString]];
     }
-    
-    if ([arrGroup count] > 0) {
-        NSString *lastGroupStr = [fileContent stringByMatching:[NSString stringWithFormat:@"(%@[\\s|\\S]*)",[arrGroup lastObject]]];
-        [data addObject:[[SequenceGroup alloc]initWithGroupStr:lastGroupStr]];
-    }
-    
-//    NSLog(@"%lu",(unsigned long)[_data count]);
-//
-//    for (int i = 0; i < [_data count]; i++) {
-//        NSLog(@"%@  %@  %@  %@  %@\n",
-//              [_data[i] startTime],
-//              [_data[i] endTime],
-//              [_data[i] TestName],
-//              [_data[i] SubTestName],
-//              [_data[i] SubSubTestName]);
-//    }
 }
 
+//通过特殊字符索引
 - (void)initSpecialLogSubString:(NSArray *)arr fromStartStr:(NSString *)start_str toEndStr:(NSString *)end_str ignoreOption:(NSArray *)optArr
 {
     NSUInteger length;
     NSUInteger location = 0;
     NSMutableString *retString;
-    NSMutableString *subString = nil;
-    NSMutableString *line = nil;
+    NSString *subString = nil;
+    NSString *line = nil;
     BOOL ignoreFlag = NO;
+    NSString *line_break = nil;
+    int add_len = 0;
     
     for (int i = 0; i < [arr count]; i++) {
         length = [fileContent length];
         retString = [[NSMutableString alloc]init];
         
-        while (location < length) {
-            subString = [[NSMutableString alloc]initWithString:[fileContent substringFromIndex:location]];
-            line = [[NSMutableString alloc]initWithString:[subString stringByMatching:@".*"]];
-            
-            if (([subString length] >= [line length] + 2) && [[subString substringToIndex:[line length]+2] containsString:[NSString stringWithFormat:@"%@\r\n",line]]){
-                [line appendString:@"\r\n"];
-            }else if (([subString length] >= [line length] + 1) && [[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\n",line]]){
-                [line appendString:@"\n"];
-            }else if (([subString length] >= [line length] + 1) && [[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\r",line]]){
-                [line appendString:@"\r"];
-            }
-            
-            [retString appendString:line];
-            location += [line length];
-            
-            
-            if ([[line stringByMatching:start_str] length] > 0) {
+        @autoreleasepool{
+            while (location < length) {
+                subString = [fileContent substringFromIndex:location];
+                line = [subString stringByMatching:@".*"];
                 
-                ignoreFlag = YES;
-                for (int j = 0; j < [optArr count]; j++) {
-                    if ([[line stringByMatching:optArr[j]] length] > 0) {
-                        ignoreFlag = NO;
+                if (([subString length] >= [line length] + 2) && [[subString substringToIndex:[line length]+2] containsString:[NSString stringWithFormat:@"%@\r\n",line]]){
+                    //                [line appendString:@"\r\n"];
+                    add_len = 2;
+                    line_break = @"\r\n";
+                }else if (([subString length] >= [line length] + 1) && [[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\n",line]]){
+                    //                [line appendString:@"\n"];
+                    add_len = 1;
+                    line_break = @"\n";
+                }else if (([subString length] >= [line length] + 1) && [[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\r",line]]){
+                    //                [line appendString:@"\r"];
+                    add_len = 1;
+                    line_break = @"\r";
+                }
+                
+                [retString appendFormat:@"%@%@",line,line_break];
+                location = location + [line length] + add_len;
+                
+                
+                if ([[line stringByMatching:start_str] length] > 0) {
+                    
+                    ignoreFlag = YES;
+                    for (int j = 0; j < [optArr count]; j++) {
+                        if ([[line stringByMatching:optArr[j]] length] > 0) {
+                            ignoreFlag = NO;
+                        }
                     }
+                }
+                
+                if (ignoreFlag && [[line stringByMatching:end_str] length] > 0) {
+                    ignoreFlag = NO;
+                    break;
                 }
             }
             
-            if (ignoreFlag && [[line stringByMatching:end_str] length] > 0) {
-                ignoreFlag = NO;
-                [line setString:@""];
-                [subString setString:@""];
-                break;
+            if (i == [arr count] - 1) {
+                [retString appendString:subString];
             }
-            
-            [line setString:@""];
-            [subString setString:@""];
-        }
-        
-        if (i == [arr count] - 1) {
-            [retString appendString:subString];
         }
         
         [arrSubString addObject:retString];
     }
 }
 
+//通过时间戳索引
 - (void)initCommonLogSubString:(NSArray *)arr
 {
     NSArray *arrGroup = [fileContent componentsMatchedByRegex:timeTampType];
@@ -174,10 +218,12 @@
     NSUInteger length;
     NSUInteger location = 0;
     NSMutableString *retString = nil;
-    NSMutableString *subString = nil;
-    NSMutableString *line = nil;
+    NSString *subString = nil;
+    NSString *line = nil;
     TimeTamp *tempTp = nil;
     BOOL ignoreTimeTampFlag = NO;
+    NSString *line_break = nil;
+    int add_len = 0;
     
     for (int i = 0; i < [arr count]; i++) {
         TimeTamp *sub_tp1 = [[TimeTamp alloc]initWithString:((SequenceGroup *)arr[i])->startTime
@@ -202,51 +248,53 @@
         length = [fileContent length];
         retString = [[NSMutableString alloc]init];
         
-        while (location < length) {
-            
-            subString = [[NSMutableString alloc]initWithString:[fileContent substringFromIndex:location]];
-            line = [[NSMutableString alloc]initWithString:[subString stringByMatching:@".*"]];
-            
-            if (([subString length] >= [line length] + 2) && [[subString substringToIndex:[line length]+2] containsString:[NSString stringWithFormat:@"%@\r\n",line]]){
-                [line appendString:@"\r\n"];
-            }else if (([subString length] >= [line length] + 1) && [[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\n",line]]){
-                [line appendString:@"\n"];
-            }else if (([subString length] >= [line length] + 1) && [[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\r",line]]){
-                [line appendString:@"\r"];
-            }
-            
-            tempTp = [[TimeTamp alloc]initWithString:[line stringByMatching:timeTampType]
-                                   msPrecisionLength:msPrecisionLength
-                                         integerType:@"DEFAULT"];
-            if(tempTp != nil){
-                if([tempTp isLaterThanTimeTamp:sub_tp2]){
-                    ignoreTimeTampFlag = NO;
-                    break;
-                }else{
-                    [retString appendString:line];
-                    ignoreTimeTampFlag = YES;
+        @autoreleasepool {
+            while (location < length) {
+                
+                subString = [fileContent substringFromIndex:location];
+                line = [subString stringByMatching:@".*"];
+                
+                if (([subString length] >= [line length] + 2) && [[subString substringToIndex:[line length]+2] containsString:[NSString stringWithFormat:@"%@\r\n",line]]){
+                    //                [line appendString:@"\r\n"];
+                    add_len = 2;
+                    line_break = @"\r\n";
+                }else if (([subString length] >= [line length] + 1) && [[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\n",line]]){
+                    //                [line appendString:@"\n"];
+                    add_len = 1;
+                    line_break = @"\n";
+                }else if (([subString length] >= [line length] + 1) && [[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\r",line]]){
+                    //                [line appendString:@"\r"];
+                    add_len = 1;
+                    line_break = @"\r";
                 }
+                
+                tempTp = [[TimeTamp alloc]initWithString:[line stringByMatching:timeTampType]
+                                       msPrecisionLength:msPrecisionLength
+                                             integerType:@"DEFAULT"];
+                if(tempTp != nil){
+                    if([tempTp isLaterThanTimeTamp:sub_tp2]){
+                        ignoreTimeTampFlag = NO;
+                        break;
+                    }else{
+                        
+                        [retString appendFormat:@"%@%@",line,line_break];
+                        ignoreTimeTampFlag = YES;
+                    }
+                }
+                
+                if (ignoreTimeTampFlag && tempTp == nil) {
+                    [retString appendFormat:@"%@%@",line,line_break];
+                }
+                
+                location = location + [line length] + add_len;
+                
+                [tempTp release];
+                //            [line release];
+                //            [subString release];
             }
-            
-            if (ignoreTimeTampFlag && tempTp == nil) {
-                [retString appendString:line];
-            }
-            
-            location += [line length];
-            
-            [tempTp release];
-            [line setString:@""];
-            [subString setString:@""];
         }
         
-//        if ([retString length] < 1) {
-//            [arrSubString addObject:@""];
-//        }else{
-//            [arrSubString addObject:retString];
-//        }
-        
         [arrSubString addObject:retString];
-        
         
         [tp1 release];
         [tp2 release];
@@ -255,75 +303,77 @@
     }
 }
 
-- (NSString *)subString:(NSString *)content withTimeTampArr:(NSArray *)arr
-{
-    NSArray *arrGroup = [content componentsMatchedByRegex:timeTampType];
-    
-    TimeTamp *sub_tp1 = [[TimeTamp alloc]initWithString:arr[0] msPrecisionLength:msPrecisionLength integerType:@"DOWN"];
-    TimeTamp *sub_tp2 = [[TimeTamp alloc]initWithString:[arr lastObject] msPrecisionLength:msPrecisionLength integerType:@"UP"];
-    
-    TimeTamp *tp1 = [[TimeTamp alloc]initWithString:arrGroup[0] msPrecisionLength:msPrecisionLength integerType:@"DEFAULT"];
-    TimeTamp *tp2 = [[TimeTamp alloc]initWithString:[arrGroup lastObject] msPrecisionLength:msPrecisionLength integerType:@"DEFAULT"];
-    
-    if ([tp1 isLaterThanTimeTamp:sub_tp2] || [tp2 isBeforeThanTimeTamp:sub_tp1]) {
-        NSLog(@"Do not contain these timp tamp!");
-        return nil;
-    }
-    
-    NSUInteger length = [content length];
-    NSUInteger location = 0;
-    
-    NSMutableString *retString = [[NSMutableString alloc]init];
-    NSMutableString *subString = nil;
-    NSMutableString *line = nil;
-    TimeTamp *tempTp = nil;
-    BOOL ignoreTimeTampFlag = NO;
-    
-    while (location <= length) {
-        
-        subString = [[NSMutableString alloc]initWithString:[content substringFromIndex:location]];
-        line = [[NSMutableString alloc]initWithString:[subString stringByMatching:@".*"]];
-        
-        if ([[subString substringToIndex:[line length]+2] containsString:[NSString stringWithFormat:@"%@\r\n",line]]){
-            [line appendString:@"\r\n"];
-        }else if ([[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\n",line]]){
-            [line appendString:@"\n"];
-        }else if ([[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\r",line]]){
-            [line appendString:@"\r"];
-        }
-        
-        tempTp = [[TimeTamp alloc]initWithString:[line stringByMatching:timeTampType]
-                               msPrecisionLength:msPrecisionLength
-                                     integerType:@"DEFAULT"];
-        if(tempTp != nil){
-            if(([tempTp isLaterThanTimeTamp:sub_tp1] || [tempTp isEqualToTimeTamp:sub_tp1]) && ([tempTp isBeforeThanTimeTamp:sub_tp2] || [tempTp isEqualToTimeTamp:sub_tp2])){
-                [retString appendString:line];
-                ignoreTimeTampFlag = YES;
-            }else if([tempTp isLaterThanTimeTamp:sub_tp2]){
-                ignoreTimeTampFlag = NO;
-                break;
-            }
-        }
-        
-        if (ignoreTimeTampFlag && tempTp == nil) {
-            [retString appendString:line];
-        }
-        
-        location += [line length];
-        
-        [tempTp release];
-        [line setString:@""];
-        [subString setString:@""];
-    }
-    
-    [line release];
-    [subString release];
-    [tp1 release];
-    [tp2 release];
-    
-    return retString;
-}
+//- (NSString *)subString:(NSString *)content withTimeTampArr:(NSArray *)arr
+//{
+//    NSArray *arrGroup = [content componentsMatchedByRegex:timeTampType];
+//    
+//    TimeTamp *sub_tp1 = [[TimeTamp alloc]initWithString:arr[0] msPrecisionLength:msPrecisionLength integerType:@"DOWN"];
+//    TimeTamp *sub_tp2 = [[TimeTamp alloc]initWithString:[arr lastObject] msPrecisionLength:msPrecisionLength integerType:@"UP"];
+//    
+//    TimeTamp *tp1 = [[TimeTamp alloc]initWithString:arrGroup[0] msPrecisionLength:msPrecisionLength integerType:@"DEFAULT"];
+//    TimeTamp *tp2 = [[TimeTamp alloc]initWithString:[arrGroup lastObject] msPrecisionLength:msPrecisionLength integerType:@"DEFAULT"];
+//    
+//    if ([tp1 isLaterThanTimeTamp:sub_tp2] || [tp2 isBeforeThanTimeTamp:sub_tp1]) {
+//        NSLog(@"Do not contain these timp tamp!");
+//        return nil;
+//    }
+//    
+//    NSUInteger length = [content length];
+//    NSUInteger location = 0;
+//    
+//    NSMutableString *retString = [[NSMutableString alloc]init];
+//    NSMutableString *subString = nil;
+//    NSMutableString *line = nil;
+//    TimeTamp *tempTp = nil;
+//    BOOL ignoreTimeTampFlag = NO;
+//    
+//    while (location <= length) {
+//        
+//        subString = [[NSMutableString alloc]initWithString:[content substringFromIndex:location]];
+//        line = [[NSMutableString alloc]initWithString:[subString stringByMatching:@".*"]];
+//        
+//        if ([[subString substringToIndex:[line length]+2] containsString:[NSString stringWithFormat:@"%@\r\n",line]]){
+//            [line appendString:@"\r\n"];
+//        }else if ([[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\n",line]]){
+//            [line appendString:@"\n"];
+//        }else if ([[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\r",line]]){
+//            [line appendString:@"\r"];
+//        }
+//        
+//        tempTp = [[TimeTamp alloc]initWithString:[line stringByMatching:timeTampType]
+//                               msPrecisionLength:msPrecisionLength
+//                                     integerType:@"DEFAULT"];
+//        if(tempTp != nil){
+//            if(([tempTp isLaterThanTimeTamp:sub_tp1] || [tempTp isEqualToTimeTamp:sub_tp1]) && ([tempTp isBeforeThanTimeTamp:sub_tp2] || [tempTp isEqualToTimeTamp:sub_tp2])){
+//                [retString appendString:line];
+//                ignoreTimeTampFlag = YES;
+//            }else if([tempTp isLaterThanTimeTamp:sub_tp2]){
+//                ignoreTimeTampFlag = NO;
+//                break;
+//            }
+//        }
+//        
+//        if (ignoreTimeTampFlag && tempTp == nil) {
+//            [retString appendString:line];
+//        }
+//        
+//        location += [line length];
+//        
+//        [tempTp release];
+//        [line setString:@""];
+//        [subString setString:@""];
+//    }
+//    
+//    [tempTp release];
+//    [line release];
+//    [subString release];
+//    [tp1 release];
+//    [tp2 release];
+//    
+//    return retString;
+//}
 
+//根据Select View所勾选获取对应log
 - (NSString *)getSubString:(NSArray *)arr
 {
     NSString *str;

@@ -15,6 +15,11 @@
     self = [super init];
     if (self) {
         NSArray *arrItem = [groupStr componentsMatchedByRegex:@"(\\d+\\-\\d+\\-\\d+\\s\\d+\\:\\d+\\:\\d+\\.\\d+.+\n)"];
+        
+        if ([arrItem count] < 1) {
+            return nil;
+        }
+        
         startTime = [[NSString alloc]initWithFormat:@"%@",[arrItem[0] stringByMatching:@"(\\d+\\-\\d+\\-\\d+\\s\\d+\\:\\d+\\:\\d+\\.\\d+)"]];
         endTime = [[NSString alloc]initWithFormat:@"%@",[[arrItem lastObject] stringByMatching:@"(\\d+\\-\\d+\\-\\d+\\s\\d+\\:\\d+\\:\\d+\\.\\d+)"]];
         NSArray *tempArr = [arrItem[0] componentsSeparatedByString:@","];
