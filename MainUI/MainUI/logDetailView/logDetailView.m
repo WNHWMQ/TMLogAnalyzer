@@ -35,29 +35,34 @@
 
 -(void)UpdateViewLog:(NSDictionary *)dic
 {
-    NSTextView *view = [dic valueForKey:@"LogType"];
-    NSString *str = [dic valueForKey:@"Content"];
-    
-    
-    
-    NSMutableString * pstr = [[view textStorage] mutableString];
-    //    if ([str containsString:@"\n"])
-    //    {
-    //        [pstr appendFormat:@"%@",str];
-    //    }
-    //    else
-    //    {
-    //        [pstr appendFormat:@"%@\n",str];
-    //    }
-    
-    if ([str length] < 1) {
-        [pstr setString:@""];
-        return;
+    @autoreleasepool {
+        NSTextView *view = [dic valueForKey:@"LogType"];
+        NSString *str = [dic valueForKey:@"Content"];
+        
+        
+        
+        NSMutableString * pstr = [[view textStorage] mutableString];
+        //    if ([str containsString:@"\n"])
+        //    {
+        //        [pstr appendFormat:@"%@",str];
+        //    }
+        //    else
+        //    {
+        //        [pstr appendFormat:@"%@\n",str];
+        //    }
+        
+        if ([str length] < 1) {
+            [pstr setString:@""];
+            return;
+        }
+        
+        [pstr setString:str];
+        NSRange range = NSMakeRange([pstr length]-1,0);
+        [view scrollRangeToVisible:range];//显示的文本滚动到最后一行
+        
+//        [str release];
+//        [pstr release];
     }
-    
-    [pstr setString:str];
-    NSRange range = NSMakeRange([pstr length]-1,0);
-    [view scrollRangeToVisible:range];//显示的文本滚动到最后一行
 }
 
 -(void)RefreshLogView:(NSString *)logType withContent:(NSString *)content

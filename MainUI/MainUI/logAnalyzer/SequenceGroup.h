@@ -20,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
     NSString *TestName;
     NSString *SubTestName;
     NSString *SubSubTestName;
+    BOOL skipValue;
 }
 //@property (strong) NSString *startTime;
 //@property (strong) NSString *endTime;
@@ -27,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 //@property (strong) NSString *SubTestName;
 //@property (strong) NSString *SubSubTestName;
 
-- (instancetype)initWithGroupStr:(NSString *)groupStr;
+- (instancetype)initWithGroupStr:(NSString *)groupStr andSkipValue:(NSString *)sv;
 @end
 
 NS_ASSUME_NONNULL_END

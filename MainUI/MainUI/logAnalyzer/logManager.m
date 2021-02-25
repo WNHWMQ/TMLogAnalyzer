@@ -60,7 +60,7 @@
                                      fromPivotData:[(logHandler *)[logSelectHandlerDic valueForKey:pivot] data]];
             
             [logSelectHandlerDic setObject:failRows forKey:@"failRows"];
-            [[logDetailHandlerDic valueForKey:sequencer] analyzeSequenceLog];
+            [[logDetailHandlerDic valueForKey:sequencer] analyzeSequenceLog:[(logHandler *)[logSelectHandlerDic valueForKey:pivot] data]];
             
             logHandler *lh_temp;
             
@@ -73,22 +73,20 @@
 //                [thread start];
                 
                 lh_temp = [logDetailHandlerDic valueForKey:key];
-//                dispatch_async(dispatch_get_main_queue(), ^{
-                    if ([key isEqualToString:EngineLog] || [key isEqualToString:engine]) {
-                        [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
-                                            fromStartStr:@"< Received >"
-                                                toEndStr:@"< Result >"
-                                            ignoreOption:@[@"start_test",@"end_test"]];
-                    }else if ([key isEqualToString:flow_plain]){
-                        [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
-                                            fromStartStr:@"==Test:"
-                                                toEndStr:lh_temp->timeTampType
-                                            ignoreOption:@[]];
-
-                    }else{
-                        [lh_temp initCommonLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]];
-                    }
-//                });
+                if ([key isEqualToString:EngineLog] || [key isEqualToString:engine]) {
+                    [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
+                                        fromStartStr:@"< Received >"
+                                            toEndStr:@"< Result >"
+                                        ignoreOption:@[@"start_test",@"end_test"]];
+                }else if ([key isEqualToString:flow_plain]){
+                    [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
+                                        fromStartStr:@"==Test:"
+                                            toEndStr:lh_temp->timeTampType
+                                        ignoreOption:@[]];
+                    
+                }else{
+                    [lh_temp initCommonLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]];
+                }
             }
             
         }else{
@@ -120,7 +118,7 @@
     
     //将文件解压至临时文件夹，并将路径空格进行转义
     NSString *system_path = [filePath stringByReplacingOccurrencesOfString:@" " withString:@"\\ "];
-    NSString *cmd = [NSString stringWithFormat:@"unzip -o %@ -d %@",system_path,tempPath];
+    NSString *cmd = [NSString stringWithFormat:@"unzip -o %@ -d %@ -x __MACOSX/*",system_path,tempPath];
     int ret = system([cmd UTF8String]);
     if ( ret != 0) {
         NSDictionary *dic = [[NSDictionary alloc]initWithObjectsAndKeys:@"无法解压该文件!",@"message", nil];

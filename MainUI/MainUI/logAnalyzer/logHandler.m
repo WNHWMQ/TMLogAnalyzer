@@ -7,9 +7,23 @@
 //
 
 #import "logHandler.h"
+//log file type
 #define pivot           @"pivot.csv"
 #define FAIL_Summary    @"FAIL_Summary.csv"
+#define EngineLog       @"EngineLog.log"
+#define smcLog          @"smcLog.log"
+#define engine          @"engine.log"
+#define flow_plain      @"flow_plain.log"
+#define hw              @"hw.log"
+#define iefi            @"iefi.log"
 #define sequencer       @"sequencer.log"
+#define uart            @"uart.txt"
+#define uart2           @"uart2.txt"
+#define uart3           @"uart3.txt"
+#define power           @"power.log"
+#define efi0_kis        @"efi0-kis.log"
+#define efi0_uart       @"efi0-uart.log"
+#define usbfs           @"usbfs.log"
 
 @implementation logHandler
 
@@ -44,6 +58,12 @@
                 data = nil;
             }
             
+            if ([logType containsString:EngineLog] || [logType containsString:engine]) {
+                allowSkip = YES;
+            }else{
+                allowSkip = NO;
+            }
+            
         }else{
             return nil;
         }
@@ -57,11 +77,13 @@
     NSArray *rowData = [content componentsSeparatedByString:@"\n"];
     NSArray *headItem = [rowData[0] componentsSeparatedByString:@","];
     NSMutableArray *arr = [[NSMutableArray alloc]init];
+    NSMutableDictionary *dic;
+    NSArray *rowItem;
     
     for (int i = 1; i < [rowData count]; i++) {
         if (rowData[i] && [rowData[i] isNotEqualTo:@""]) {
-            NSArray *rowItem = [rowData[i] componentsSeparatedByString:@","];
-            NSMutableDictionary *dic = [[NSMutableDictionary alloc]init];
+            rowItem = [rowData[i] componentsSeparatedByString:@","];
+            dic = [[NSMutableDictionary alloc]init];
             for (int j = 0; j < [rowItem count]; j++) {
                 [dic setValue:rowItem[j] forKey:headItem[j]];
             }
@@ -73,7 +95,7 @@
 }
 
 //按时间戳及"runing test"字符串，分组解析sequence.log数据
-- (void)analyzeSequenceLog
+- (void)analyzeSequenceLog:(NSArray *)pivotData
 {
     if (![fileName containsString:sequencer]) {
         NSLog(@"Can't analyze other file without sequencer.log!");
@@ -91,20 +113,21 @@
     
     
     NSArray *arrGroup = [fileContent componentsMatchedByRegex:[NSString stringWithFormat:@"%@.+running test",timeTampType]];
-    if ([arrGroup count] < 1) {
-        NSLog(@"Analyze sequence log error without running test!");
+    if ([arrGroup count] != [pivotData count]) {
+        NSLog(@"Analyze sequence log error, indexs is different from pivot log");
         return;
     }
     
     data = [[NSMutableArray alloc]init];
     length = [fileContent length];
     
+    //过滤第一个running test之前的无效字符
     NSString *regex = [NSString stringWithFormat:@"([\\s|\\S]*%@)",[fileContent stringByMatching:arrGroup[0]]];
     location = [[[fileContent stringByMatching:regex]stringByMatching:@"([\\s|\\S]*\n)"] length];
     
-    @autoreleasepool {
-        for (int i = 0; i < [arrGroup count]; i++) {
-            
+    for (int i = 0; i < [arrGroup count]; i++) {
+        
+        @autoreleasepool {
             groupStr = [[NSMutableString alloc]init];
             
             while (location < length) {
@@ -126,24 +149,26 @@
                     line_break = @"\r";
                 }
                 
-                if ([line containsString:arrGroup[i]]) {
-                    if (firstFilterFlag) {
-                        firstFilterFlag = NO;
-                    }else{
-                        [data addObject:[[SequenceGroup alloc]initWithGroupStr:groupStr]];
+                if (i + 1 < [arrGroup count]) {
+                    if ([line containsString:arrGroup[i + 1]]) {//非最后一组时搜索下一组的时间戳
+                        [data addObject:[[SequenceGroup alloc]initWithGroupStr:groupStr andSkipValue:[pivotData[i] valueForKey:@"result"]]];
                         [groupStr setString:@""];
+                        break;
                     }
+                }else{//最后一组时通过剩余subString初始化
+                    [data addObject:[[SequenceGroup alloc]initWithGroupStr:subString andSkipValue:[[pivotData lastObject] valueForKey:@"result"]]];
                     break;
-                    
-                }else{
-                    [groupStr appendFormat:@"%@%@",line,line_break];
                 }
+
+                [groupStr appendFormat:@"%@%@",line,line_break];
                 
                 location = location + [line length] + add_len;
             }
         }
-        [data addObject:[[SequenceGroup alloc]initWithGroupStr:subString]];
     }
+    
+    
+    
 }
 
 //通过特殊字符索引
@@ -159,6 +184,12 @@
     int add_len = 0;
     
     for (int i = 0; i < [arr count]; i++) {
+        
+        if (allowSkip && ((SequenceGroup *)arr[i])->skipValue) {
+            [arrSubString addObject:@"\nSKIP\n"];
+            continue;
+        }
+        
         length = [fileContent length];
         retString = [[NSMutableString alloc]init];
         
@@ -385,35 +416,32 @@
     NSArray *subArr;
     NSMutableString *retString = [[NSMutableString alloc]init];
     
-    for (int i = 0; i < [arr count]; i++) {
-        
-        start = [arr[i][0] integerValue];
-        end = [[arr[i] lastObject] integerValue];
-        
-        if (start >= [arrSubString count] || start < 0) {
-            NSLog(@"Can't get sub string from %@ log, index out of range",logType);
-            return @"";
-        }
-        
-        if (start >= [arrSubString count] || start < 0) {
-            NSLog(@"Can't get sub string from %@ log, index out of range",logType);
-            return @"";
-        }
-        
-        loc = start;
-        len = end - start + 1;
-        
-        subArr = [arrSubString subarrayWithRange:NSMakeRange(loc, len)];
-        
-        for (int j = 0; j < [subArr count]; j++) {
-            str = subArr[j];
-            if ([str length] > 0) {
-                [retString appendFormat:@"%@",str];
+    @autoreleasepool {
+        for (int i = 0; i < [arr count]; i++) {
+            
+            start = [arr[i][0] integerValue];
+            end = [[arr[i] lastObject] integerValue];
+            
+            if (start >= [arrSubString count] || start < 0) {
+                NSLog(@"Can't get sub string from %@ log, index out of range",logType);
+                return @"";
+            }
+            
+            loc = start;
+            len = end - start + 1;
+            
+            subArr = [arrSubString subarrayWithRange:NSMakeRange(loc, len)];
+            
+            for (int j = 0; j < [subArr count]; j++) {
+                str = subArr[j];
+                if ([str length] > 0) {
+                    [retString appendFormat:@"%@",str];
+                }
             }
         }
+        return retString;
     }
-    
-    return retString;
+
 }
 
 - (NSMutableArray *)data{

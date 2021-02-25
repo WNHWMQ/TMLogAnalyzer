@@ -26,7 +26,8 @@
         [[NSDistributedNotificationCenter defaultCenter]addObserver:self selector:@selector(showAlertMessageBox:) name:kShowAlertMessageBox object:nil suspensionBehavior:NSNotificationSuspensionBehaviorDeliverImmediately];
         [[NSDistributedNotificationCenter defaultCenter]addObserver:self selector:@selector(RefreshDetailView:) name:kRefreshDetailView object:nil suspensionBehavior:NSNotificationSuspensionBehaviorDeliverImmediately];
 
-        NSString *zipPath = [[NSString alloc]initWithString:@"/Users/henry/Desktop/TM LOG/MAC FCT/C02102200GFPY5L42_20210125-063242.990370_J457_FCT_FCT_C02102200GFPY5L42_FAIL.zip"];
+//        NSString *zipPath = [[NSString alloc]initWithString:@"/Users/henry/Desktop/TM LOG/MAC FCT/C02102200GFPY5L42_20210125-063242.990370_J457_FCT_FCT_C02102200GFPY5L42_FAIL.zip"];
+        NSString *zipPath = [[NSString alloc]initWithString:@"/Users/henry/Desktop/TM LOG/PAD FCT/FCT/DLX0522000YQ4FK1E_20201223-203041.154365_J517_FCT_FCT_DLX0522000YQ4FK1E_PASS.zip"];
         log_manager = [[logManager alloc] initWithZipPath:zipPath];
         
         [zipPath release];
@@ -123,58 +124,58 @@
         return;
     }
     
-    logHandler *lh;
-    NSMutableArray *arr = [[NSMutableArray alloc]init];
-    
-    int i = 0;
-    int j = 0;
-    
-    NSString *start_tp = nil;
-    NSString *end_tp = nil;
-    
-    do {
-        j = i + 1;
+    @autoreleasepool {
+        logHandler *lh;
+        NSMutableArray *arr = [[NSMutableArray alloc]init];
         
-        if (j == [indexs count]) {
-            start_tp = indexs[i];
-            end_tp = indexs[i];
-            [arr addObject:@[start_tp,end_tp]];
-            break;
-        }
+        int i = 0;
+        int j = 0;
         
-        start_tp = indexs[i];
-        while ([indexs[j] intValue] - [indexs[j-1] intValue] == 1) {
-            end_tp = indexs[j];
-            j++;
+        NSString *start_tp = nil;
+        NSString *end_tp = nil;
+        
+        do {
+            j = i + 1;
+            
             if (j == [indexs count]) {
-                end_tp = indexs[j-1];
+                start_tp = indexs[i];
+                end_tp = indexs[i];
+                [arr addObject:@[start_tp,end_tp]];
                 break;
             }
-        }
+            
+            start_tp = indexs[i];
+            while ([indexs[j] intValue] - [indexs[j-1] intValue] == 1) {
+                end_tp = indexs[j];
+                j++;
+                if (j == [indexs count]) {
+                    end_tp = indexs[j-1];
+                    break;
+                }
+            }
+            
+            if (i + 1 == j) {
+                end_tp = indexs[i];
+            }
+            i = j;
+            
+            [arr addObject:@[start_tp,end_tp]];
+        } while (i < [indexs count] && j < [indexs count]);
         
-        if (i + 1 == j) {
-            end_tp = indexs[i];
-        }
-        i = j;
         
-        [arr addObject:@[start_tp,end_tp]];
-    } while (i < [indexs count] && j < [indexs count]);
-
-    
-    for (NSString *key in log_manager->logDetailHandlerDic) {
-        lh = [log_manager->logDetailHandlerDic valueForKey:key];
-        [logDetailViewController RefreshLogView:lh->logType withContent:[lh getSubString:arr]];
-    }
-    
-    
-    for (int i = 0; i < [arr count]; i++) {
-        for (int j = 0; j < [arr[i] count]; j++) {
-            [arr[i] setString:@""];
-            [arr[i] release];
+        for (NSString *key in log_manager->logDetailHandlerDic) {
+            lh = [log_manager->logDetailHandlerDic valueForKey:key];
+            [logDetailViewController RefreshLogView:lh->logType withContent:[lh getSubString:arr]];
         }
     }
-    
-    [arr release];
+//    for (int i = 0; i < [arr count]; i++) {
+//        for (int j = 0; j < [arr[i] count]; j++) {
+//            [arr[i] setString:@""];
+//            [arr[i] release];
+//        }
+//    }
+//    
+//    [arr release];
 }
 
 //根据Table所选,刷新Log内容

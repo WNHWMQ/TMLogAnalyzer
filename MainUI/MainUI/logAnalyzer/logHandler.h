@@ -25,9 +25,10 @@ NS_ASSUME_NONNULL_BEGIN
     NSString *logType;
     NSString *timeTampType;
     NSMutableArray *arrSubString;
+    BOOL allowSkip;
 }
 
-- (void)analyzeSequenceLog;
+- (void)analyzeSequenceLog:(NSArray *)pivotData;
 - (NSMutableArray *)data;
 - (instancetype)initWithFilePath:(NSString *)path andTypeController:(logTypeController *)typeController;
 - (NSString *)getSubString:(NSArray *)arr;
