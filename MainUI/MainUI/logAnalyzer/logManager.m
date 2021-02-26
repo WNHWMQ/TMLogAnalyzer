@@ -42,6 +42,8 @@
         logHandler *lh;
         
         if (unzipPath) {
+            
+            //1.解压并初始化zip中的文件为logHandler对象
             arrLogPath = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:unzipPath error:nil];
             for (int i = 0; i < [arrLogPath count]; i++) {
                 lh = [[logHandler alloc] initWithFilePath:[unzipPath stringByAppendingPathComponent:arrLogPath[i]]
@@ -56,49 +58,66 @@
                 }
             }
             
+            
+            //2.初始化 FAIL_Summary 在pivot 中对应的序号信息
             NSArray *failRows = [self findFailRows:[(logHandler *)[logSelectHandlerDic valueForKey:FAIL_Summary] data]
                                      fromPivotData:[(logHandler *)[logSelectHandlerDic valueForKey:pivot] data]];
             
             [logSelectHandlerDic setObject:failRows forKey:@"failRows"];
+            
+            
+            //3.先初始化sequencer log获取时间戳等信息
             [[logDetailHandlerDic valueForKey:sequencer] analyzeSequenceLog:[(logHandler *)[logSelectHandlerDic valueForKey:pivot] data]];
             
-            logHandler *lh_temp;
+            
+            //多线程并发处理，将每个log拆分为string数组片段
+            //创建一个调度组
+            dispatch_group_t group = dispatch_group_create();
+            //获取全局并发队列
+            dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
             
             for (NSString *key in logDetailHandlerDic) {
+                //手动添加一个任务到调度组
+                dispatch_group_enter(group);
                 
-//                logHandler *lh_temp = [logDetailHandlerDic valueForKey:key];
-//                NSThread *thread = [[NSThread alloc]initWithTarget:self
-//                                                          selector:@selector(initDetailLogData:)
-//                                                            object:[logDetailHandlerDic valueForKey:key]];
-//                [thread start];
-                
-                lh_temp = [logDetailHandlerDic valueForKey:key];
-                if ([key isEqualToString:EngineLog] || [key isEqualToString:engine]) {
-                    [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
-                                        fromStartStr:@"< Received >"
-                                            toEndStr:@"< Result >"
-                                        ignoreOption:@[@"start_test",@"end_test"]];
-                }else if ([key isEqualToString:flow_plain]){
-                    [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
-                                        fromStartStr:@"==Test:"
-                                            toEndStr:lh_temp->timeTampType
-                                        ignoreOption:@[]];
+                dispatch_async(queue, ^{
                     
-                }else{
-                    [lh_temp initCommonLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]];
-                }
+                    NSLog(@"线程 %@ 信息:%@",key,[NSThread currentThread]);
+                    
+                    logHandler *lh_temp = [logDetailHandlerDic valueForKey:key];
+                    if ([key isEqualToString:EngineLog] || [key isEqualToString:engine]) {
+                        NSLog(@"线程 %@ 开始",key);
+                        [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
+                                            fromStartStr:@"< Received >"
+                                                toEndStr:@"< Result >"
+                                            ignoreOption:@[@"start_test",@"end_test"]];
+                        NSLog(@"线程 %@ 结束",key);
+                    }else if ([key isEqualToString:flow_plain]){
+                        NSLog(@"线程 %@ 开始",key);
+                        [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
+                                            fromStartStr:@"==Test:"
+                                                toEndStr:lh_temp->timeTampType
+                                            ignoreOption:@[]];
+                        NSLog(@"线程 %@ 结束",key);
+                        
+                    }else{
+                        NSLog(@"线程 %@ 开始",key);
+                        [lh_temp initCommonLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]];
+                        NSLog(@"线程 %@ 结束",key);
+                    }
+                    //该任务执行完毕从调度组移除
+                    dispatch_group_leave(group);
+                });
             }
             
+            //等待所有任务执行完毕 参数：1.对应的调度组 2.超时时间
+            dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+            NSLog(@"全部任务结束!");
         }else{
             return nil;
         }
     }
     return self;
-}
-
-- (void)initDetailLogData:(logHandler *)lh
-{
-    [lh initCommonLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]];
 }
 
 //解压 zip log
