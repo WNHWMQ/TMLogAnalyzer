@@ -7,10 +7,13 @@
 //
 
 #import "AppDelegate.h"
+#import "logAnalyzer/logTypeController.h"
 
 #define kShowAlertMessageBox    @"kShowAlertMessageBox"
 #define kRefreshDetailView      @"kRefreshDetailView"
 #define sequencer               @"sequencer.log"
+
+#define Key_ZipLogPath             @"ZipLogPath"
 
 @interface AppDelegate ()
 
@@ -25,36 +28,78 @@
     if (self) {
         [[NSDistributedNotificationCenter defaultCenter]addObserver:self selector:@selector(showAlertMessageBox:) name:kShowAlertMessageBox object:nil suspensionBehavior:NSNotificationSuspensionBehaviorDeliverImmediately];
         [[NSDistributedNotificationCenter defaultCenter]addObserver:self selector:@selector(RefreshDetailView:) name:kRefreshDetailView object:nil suspensionBehavior:NSNotificationSuspensionBehaviorDeliverImmediately];
-
-//        NSString *zipPath = [[NSString alloc]initWithString:@"/Users/henry/Desktop/TM LOG/MAC FCT/C02102200GFPY5L42_20210125-063242.990370_J457_FCT_FCT_C02102200GFPY5L42_FAIL.zip"];
-        NSString *zipPath = [[NSString alloc]initWithString:@"/Users/henry/Desktop/TM LOG/PAD FCT/FCT/DLX0522000YQ4FK1E_20201223-203041.154365_J517_FCT_FCT_DLX0522000YQ4FK1E_PASS.zip"];
-        log_manager = [[logManager alloc] initWithZipPath:zipPath];
         
-        [zipPath release];
+        FileManager = [[NSFileManager alloc] init];
+        dicConfiguration = [[NSMutableDictionary alloc]init];
+//        TopViewRect = [TopView frame];
+//        BottomViewRect = [BottomView frame];
+        NSString* resourcePath = [[NSBundle bundleForClass:[self class]] resourcePath];
+        configFilePath = [[NSString alloc] initWithFormat:@"%@/Config.plist",resourcePath];
+        [self LoadConfig:configFilePath];
     }
     return self;
+}
+
+- (void)LoadConfig:(NSString*)path
+{
+    if (![FileManager fileExistsAtPath:path])
+    {
+        NSString* str = [NSString stringWithFormat:@"/Users/%@/Documents",NSUserName()];
+        [dicConfiguration setValue:str forKey:Key_ZipLogPath];
+        [self SaveConfig:path];
+    }
+    else
+    {
+        [dicConfiguration setValuesForKeysWithDictionary:[NSDictionary dictionaryWithContentsOfFile:path]];
+    }
+}
+
+- (void)SaveConfig:(NSString*)path
+{
+    NSString* floderPath = [path stringByDeletingLastPathComponent];
+    if (![FileManager fileExistsAtPath:floderPath])
+    {
+        [self CreateDirectoy:floderPath];
+    }
+    [dicConfiguration writeToFile:path atomically:YES];
+}
+
+-(BOOL)CreateDirectoy:(NSString*)path
+{
+    if (![path isAbsolutePath])
+    {
+        NSLog(@"TMLogAnalyzer App: '%@' is not a absolute path!",path);
+        return NO;
+    }
+    
+    if (![[path pathExtension] isEqualToString:@""])
+    {
+        NSLog(@"TMLogAnalyzer App: '%@' is not a directory path!",path);
+        return NO;
+    }
+    
+    NSFileManager* fm = [NSFileManager defaultManager];
+    NSString* pathCheck = @"/";
+    NSArray* arr = [path componentsSeparatedByString:@"/"];
+    for(NSString* component in arr)
+    {
+        BOOL isDir;
+        pathCheck = [pathCheck stringByAppendingPathComponent:component];
+        if(!([fm fileExistsAtPath:pathCheck isDirectory:&isDir] && YES == isDir))
+        {
+            if (![fm createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:nil])
+            {
+                NSLog(@"TMLogAnalyzer App: create directory '%@' fail",pathCheck);
+                return NO;
+            }
+        }
+    }
+    return YES;
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // Insert code here to initialize your application
     [_window center];
-    
-//    init log select view
-    logSelectViewController = [[logSelectView alloc]initWithData:log_manager->logSelectHandlerDic];
-    [self ReplaceView:TopView with:logSelectViewController.view];
-
-    //init log detail view
-    logDetailViewController = [[logDetailView alloc]init];
-    [self ReplaceView:BottomView with:logDetailViewController.view];
-    
-    
-    logHandler *lh;
-    for (NSString *key in log_manager->logDetailHandlerDic) {
-        lh = [log_manager->logDetailHandlerDic valueForKey:key];
-        [logDetailViewController NewLogView:lh->logType withContent:lh->fileContent];
-    }
-    
-    
 }
 
 
@@ -70,14 +115,107 @@
 {
     [newView setFrame:[oldView frame]];
     [[oldView superview] addSubview:newView];
-    [[oldView superview] replaceSubview:oldView with:newView];
-    [oldView setHidden:YES];
+    [oldView removeFromSuperview];
+//    [[oldView superview] replaceSubview:oldView with:newView];
 }
 
+//打开新的App command + N
+- (IBAction)newApplication:(NSMenuItem *)sender {
+    NSString *executablePath = [[NSBundle mainBundle] executablePath];
+    NSTask *task    = [[NSTask alloc] init];
+    task.launchPath = executablePath;
+    [task launch];
+}
+
+- (IBAction)openZipFile:(NSMenuItem *)sender {
+    
+    NSString *zipPath = nil;
+    NSOpenPanel * panel = [NSOpenPanel openPanel];
+    [panel setDirectoryURL:[NSURL fileURLWithPath:[dicConfiguration valueForKey:Key_ZipLogPath] isDirectory:YES]];
+    [panel setCanChooseDirectories:NO];
+    [panel setCanCreateDirectories:NO];
+    [panel setCanChooseFiles:YES];
+    [panel setAllowsMultipleSelection:NO];
+    [panel setAllowedFileTypes:@[@"zip"]];
+    [panel setMessage:@"Please select log file"];
+    panel.prompt = @"Choose";
+    if ([panel runModal] == NSModalResponseOK) {
+        zipPath = [[NSString alloc]initWithString:[panel.URL path]];
+    }
+    
+    if (log_manager) {
+        [log_manager dealloc];
+    }
+
+    if (logDetailViewController) {
+//        [logDetailViewController dealloc];
+    }
+    
+    if (logSelectViewController) {
+        [logSelectViewController dealloc];
+    }
+    
+    log_manager = [[logManager alloc] initWithZipPath:zipPath];
+    
+    if (log_manager) {
+        
+        [dicConfiguration setObject:zipPath forKey:Key_ZipLogPath];
+        [self SaveConfig:configFilePath];
+        
+        //init log select view
+        logSelectViewController = [[logSelectView alloc]initWithData:log_manager->logSelectHandlerDic];
+        [self ReplaceView:TopView with:logSelectViewController.view];
+        TopView = logSelectViewController.view;
+        
+        //init log detail view
+        logDetailViewController = [[logDetailView alloc]init];
+        [self ReplaceView:BottomView with:logDetailViewController.view];
+        BottomView = logDetailViewController.view;
+        
+        logHandler *lh;
+        for (NSString *key in log_manager->logDetailHandlerDic) {
+            lh = [log_manager->logDetailHandlerDic valueForKey:key];
+            [logDetailViewController NewLogView:lh->logType withContent:lh->fileContent];
+        }
+    }
+    
+    [zipPath release];
+}
+
+//打开新的log文件 command + T
 - (IBAction)addNewTab:(id)sender {
-    [logDetailViewController addNewTab:sender];
+    
+    NSString *filePath;
+    NSMutableArray *selectFiles = [[NSMutableArray alloc]init];
+    logTypeController *typeController = [[logTypeController alloc]init];
+    NSOpenPanel * panel = [NSOpenPanel openPanel];
+    [panel setDirectoryURL:[NSURL fileURLWithPath:log_manager->unzipPath isDirectory:YES]];
+    [panel setCanChooseDirectories:NO];
+    [panel setCanCreateDirectories:NO];
+    [panel setCanChooseFiles:YES];
+    [panel setAllowsMultipleSelection:YES];
+    [panel setAllowedFileTypes:@[@"log",@"csv",@"txt"]];
+    [panel setMessage:@"Please select log file"];
+    panel.prompt = @"Choose";
+    if ([panel runModal] == NSModalResponseOK) {
+        for (int i = 0; i < [panel.URLs count]; i++) {
+            filePath = [panel.URLs[i] path];
+            if ([typeController isDetailViewLog:filePath]) {
+                [selectFiles addObject:[typeController getLogType:filePath]];
+            }else{
+                NSLog(@"Invalid file: %@",filePath);
+            }
+        }
+    }
+    
+    logHandler *lh;
+    for (int i = 0; i < [selectFiles count]; i++) {
+        lh = [log_manager->logDetailHandlerDic valueForKey:selectFiles[i]];
+        [logDetailViewController NewLogView:selectFiles[i] withContent:lh->fileContent];
+    }
 }
 
+//关闭log文件 command + W
 - (IBAction)closeTab:(id)sender {
     [logDetailViewController closeTab:sender];
 }
@@ -168,14 +306,6 @@
             [logDetailViewController RefreshLogView:lh->logType withContent:[lh getSubString:arr]];
         }
     }
-//    for (int i = 0; i < [arr count]; i++) {
-//        for (int j = 0; j < [arr[i] count]; j++) {
-//            [arr[i] setString:@""];
-//            [arr[i] release];
-//        }
-//    }
-//    
-//    [arr release];
 }
 
 //根据Table所选,刷新Log内容

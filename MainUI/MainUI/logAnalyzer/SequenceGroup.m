@@ -46,6 +46,11 @@
 
 - (void)dealloc
 {
+    [startTime release];
+    [endTime release];
+    [TestName release];
+    [SubTestName release];
+    [SubSubTestName release];
     [super dealloc];
 }
 

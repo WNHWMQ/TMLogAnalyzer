@@ -20,6 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)isValidTimeTampType:(NSString *)content withLogType:(NSString *)logType;
 - (NSString *)getLogType:(NSString *)fileName;
 - (NSString *)getTimeTampType:(NSString *)content withLogType:(NSString *)logType;
+- (BOOL)isDetailViewLog:(NSString *)fileName;
+- (BOOL)isSelectViewLog:(NSString *)fileName;
 
 @end
 

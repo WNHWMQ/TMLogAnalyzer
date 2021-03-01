@@ -17,6 +17,12 @@
     logDetailView *logDetailViewController;
     logSelectView *logSelectViewController;
     logManager *log_manager;
+    
+    NSRect TopViewRect;
+    NSRect BottomViewRect;
+    NSString *configFilePath;
+    NSMutableDictionary *dicConfiguration;
+    NSFileManager* FileManager;
 }
 @end
 

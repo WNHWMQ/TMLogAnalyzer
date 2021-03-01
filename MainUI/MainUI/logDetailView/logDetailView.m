@@ -73,6 +73,10 @@
 
 -(void)NewLogView:(NSString *)logType withContent:(NSString *)content
 {
+    if ([[dicLogTextView allKeys]containsObject:logType]) {
+        NSLog(@"%@ 已存在!",logType);
+        return;
+    }
     [self addNewTabWithTitle:logType];
     [self RefreshLogView:logType withContent:content];
 }
@@ -131,6 +135,8 @@
     if ((tabBar.delegate) && ([tabBar.delegate respondsToSelector:@selector(tabView:didCloseTabViewItem:)])) {
         [tabBar.delegate tabView:tabView didCloseTabViewItem:tabViewItem];
     }
+    
+    [dicLogTextView removeObjectForKey:tabViewItem.label];
 }
 
 - (MMTabBarView *)tabBar {

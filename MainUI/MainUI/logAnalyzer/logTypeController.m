@@ -43,6 +43,36 @@
     return self;
 }
 
+- (BOOL)isDetailViewLog:(NSString *)fileName
+{
+    if ([self isValidLogType:fileName]) {
+        if ([fileName containsString:pivot] || [fileName containsString:FAIL_Summary]) {
+            return NO;
+        }else{
+            return YES;
+        }
+    }else{
+        return NO;
+    }
+    
+}
+
+- (BOOL)isSelectViewLog:(NSString *)fileName
+{
+    if ([self isValidLogType:fileName]) {
+        if ([fileName containsString:pivot] || [fileName containsString:FAIL_Summary]) {
+            return YES;
+        }else{
+            return NO;
+        }
+    }else{
+        return NO;
+    }
+    
+    
+}
+
+
 - (BOOL)isValidLogType:(NSString *)fileName
 {
     for ( int i = 0; i < [logTypeList count]; i++) {
@@ -93,6 +123,8 @@
 
 - (void)dealloc
 {
+    [logTypeList release];
+    [timeTampTypeList release];
     [super dealloc];
 }
 

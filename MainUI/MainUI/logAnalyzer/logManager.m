@@ -34,7 +34,7 @@
 {
     self = [super init];
     if (self) {
-        NSString *unzipPath = [self UnzipFile:path];
+        unzipPath = [[NSString alloc]initWithString:[self UnzipFile:path]];
         logDetailHandlerDic = [[NSMutableDictionary alloc]init];
         logSelectHandlerDic = [[NSMutableDictionary alloc]init];
         logTypeController *typeController = [[logTypeController alloc]init];
@@ -81,9 +81,6 @@
                 dispatch_group_enter(group);
                 
                 dispatch_async(queue, ^{
-                    
-                    NSLog(@"线程 %@ 信息:%@",key,[NSThread currentThread]);
-                    
                     logHandler *lh_temp = [logDetailHandlerDic valueForKey:key];
                     if ([key isEqualToString:EngineLog] || [key isEqualToString:engine]) {
                         NSLog(@"线程 %@ 开始",key);
@@ -193,6 +190,11 @@
 
 - (void)dealloc
 {
+    [logDetailHandlerDic removeAllObjects];
+    [logDetailHandlerDic release];
+    [logSelectHandlerDic removeAllObjects];
+    [logSelectHandlerDic release];
+    [unzipPath release];
     [super dealloc];
 }
 

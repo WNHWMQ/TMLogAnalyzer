@@ -15,8 +15,9 @@ NS_ASSUME_NONNULL_BEGIN
 @interface logManager : NSObject{
 
 @public
-     NSMutableDictionary *logDetailHandlerDic;
-     NSMutableDictionary *logSelectHandlerDic;
+    NSMutableDictionary *logDetailHandlerDic;
+    NSMutableDictionary *logSelectHandlerDic;
+    NSString *unzipPath;
 }
 - (instancetype)initWithZipPath:(NSString *)path;
 

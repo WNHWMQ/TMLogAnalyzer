@@ -118,23 +118,52 @@
         return;
     }
     
-    data = [[NSMutableArray alloc]init];
-    length = [fileContent length];
+    data = [[NSMutableArray alloc]initWithCapacity:[arrGroup count]];
     
+////    dispatch_group_t group = dispatch_group_create();
+////    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+//    for (int i = 0; i < [arrGroup count] - 1; i++) {
+//
+////        dispatch_group_enter(group);
+////        dispatch_async(queue, ^{
+//        NSLog(@"%d",i);
+//            NSString *begin = arrGroup[i];
+//            if ( (i+1) < [arrGroup count]) {
+//                NSString *end = arrGroup[i+1];
+//                NSString *regex = [NSString stringWithFormat:@"(%@[\\s|\\S]*%@)",begin,end];
+//                NSString *groupStr = [[fileContent stringByMatching:regex]stringByMatching:@"([\\s|\\S]*\n)"];
+//                SequenceGroup *sg =[[SequenceGroup alloc]initWithGroupStr:groupStr andSkipValue:[pivotData[i] valueForKey:@"result"]];
+//                [data addObject:sg];
+//            }
+////
+////            dispatch_group_leave(group);
+////        });
+//    }
+////    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+    
+//    if ([arrGroup count] > 0) {
+//        NSString *lastGroupStr = [fileContent stringByMatching:[NSString stringWithFormat:@"(%@[\\s|\\S]*)",[arrGroup lastObject]]];
+//        [data addObject:[[SequenceGroup alloc]initWithGroupStr:lastGroupStr andSkipValue:[[pivotData lastObject] valueForKey:@"result"]]];
+//    }
+    
+    
+    
+    length = [fileContent length];
+
     //过滤第一个running test之前的无效字符
     NSString *regex = [NSString stringWithFormat:@"([\\s|\\S]*%@)",[fileContent stringByMatching:arrGroup[0]]];
     location = [[[fileContent stringByMatching:regex]stringByMatching:@"([\\s|\\S]*\n)"] length];
-    
+
     for (int i = 0; i < [arrGroup count]; i++) {
-        
+//        NSLog(@"%d",i);
         @autoreleasepool {
             groupStr = [[NSMutableString alloc]init];
-            
+
             while (location < length) {
-                
+
                 subString = [fileContent substringFromIndex:location];
                 line = [subString stringByMatching:@".*"];
-                
+
                 if (([subString length] >= [line length] + 2) && [[subString substringToIndex:[line length]+2] containsString:[NSString stringWithFormat:@"%@\r\n",line]]){
                     //            [line appendString:@"\r\n"];
                     add_len = 2;
@@ -148,7 +177,7 @@
                     add_len = 1;
                     line_break = @"\r";
                 }
-                
+
                 if (i + 1 < [arrGroup count]) {
                     if ([line containsString:arrGroup[i + 1]]) {//非最后一组时搜索下一组的时间戳
                         [data addObject:[[SequenceGroup alloc]initWithGroupStr:groupStr andSkipValue:[pivotData[i] valueForKey:@"result"]]];
@@ -161,7 +190,7 @@
                 }
 
                 [groupStr appendFormat:@"%@%@",line,line_break];
-                
+
                 location = location + [line length] + add_len;
             }
         }
@@ -450,6 +479,15 @@
 
 - (void)dealloc
 {
+    [fileManager release];
+    [data removeAllObjects];
+    [data release];
+    [filePath release];
+    [fileName release];
+    [fileContent release];
+    [logType release];
+    [timeTampType release];
+    [arrSubString removeAllObjects];
     [super dealloc];
 }
 

@@ -261,6 +261,18 @@
 
 - (void)dealloc
 {
+    [currentTableView release];
+    [logItem removeAllObjects];
+    [logItem release];
+    [pivotData removeAllObjects];
+    [pivotData release];
+    [failSummaryData removeAllObjects];
+    [failSummaryData release];
+    
+    [currentSelectIndex removeAllObjects];
+    [currentSelectIndex release];
+    [failRowsIndex release];
+//    [arrHeadIdentifier release];
     [super dealloc];
 }
 
