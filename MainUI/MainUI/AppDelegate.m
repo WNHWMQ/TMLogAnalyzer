@@ -185,33 +185,35 @@
 //打开新的log文件 command + T
 - (IBAction)addNewTab:(id)sender {
     
-    NSString *filePath;
-    NSMutableArray *selectFiles = [[NSMutableArray alloc]init];
-    logTypeController *typeController = [[logTypeController alloc]init];
-    NSOpenPanel * panel = [NSOpenPanel openPanel];
-    [panel setDirectoryURL:[NSURL fileURLWithPath:log_manager->unzipPath isDirectory:YES]];
-    [panel setCanChooseDirectories:NO];
-    [panel setCanCreateDirectories:NO];
-    [panel setCanChooseFiles:YES];
-    [panel setAllowsMultipleSelection:YES];
-    [panel setAllowedFileTypes:@[@"log",@"csv",@"txt"]];
-    [panel setMessage:@"Please select log file"];
-    panel.prompt = @"Choose";
-    if ([panel runModal] == NSModalResponseOK) {
-        for (int i = 0; i < [panel.URLs count]; i++) {
-            filePath = [panel.URLs[i] path];
-            if ([typeController isDetailViewLog:filePath]) {
-                [selectFiles addObject:[typeController getLogType:filePath]];
-            }else{
-                NSLog(@"Invalid file: %@",filePath);
+    if (log_manager) {
+        NSString *filePath;
+        NSMutableArray *selectFiles = [[NSMutableArray alloc]init];
+        logTypeController *typeController = [[logTypeController alloc]init];
+        NSOpenPanel * panel = [NSOpenPanel openPanel];
+        [panel setDirectoryURL:[NSURL fileURLWithPath:log_manager->unzipPath isDirectory:YES]];
+        [panel setCanChooseDirectories:NO];
+        [panel setCanCreateDirectories:NO];
+        [panel setCanChooseFiles:YES];
+        [panel setAllowsMultipleSelection:YES];
+        [panel setAllowedFileTypes:@[@"log",@"csv",@"txt"]];
+        [panel setMessage:@"Please select log file"];
+        panel.prompt = @"Choose";
+        if ([panel runModal] == NSModalResponseOK) {
+            for (int i = 0; i < [panel.URLs count]; i++) {
+                filePath = [panel.URLs[i] path];
+                if ([typeController isDetailViewLog:filePath]) {
+                    [selectFiles addObject:[typeController getLogType:filePath]];
+                }else{
+                    NSLog(@"Invalid file: %@",filePath);
+                }
             }
         }
-    }
-    
-    logHandler *lh;
-    for (int i = 0; i < [selectFiles count]; i++) {
-        lh = [log_manager->logDetailHandlerDic valueForKey:selectFiles[i]];
-        [logDetailViewController NewLogView:selectFiles[i] withContent:lh->fileContent];
+        
+        logHandler *lh;
+        for (int i = 0; i < [selectFiles count]; i++) {
+            lh = [log_manager->logDetailHandlerDic valueForKey:selectFiles[i]];
+            [logDetailViewController NewLogView:selectFiles[i] withContent:lh->fileContent];
+        }
     }
 }
 

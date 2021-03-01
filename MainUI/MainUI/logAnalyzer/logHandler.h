@@ -10,6 +10,7 @@
 #import "logTypeController.h"
 #import "SequenceGroup.h"
 #import "TimeTamp.h"
+#import "../LuaAPI/LuaScriptCore.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -34,6 +35,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)getSubString:(NSArray *)arr;
 - (void)initCommonLogSubString:(NSArray *)arr;
 - (void)initSpecialLogSubString:(NSArray *)arr fromStartStr:(NSString *)start_str toEndStr:(NSString *)end_str ignoreOption:(NSArray *)optArr;
+
+@property(nonatomic, strong) LSCContext *context;
 
 @end
 

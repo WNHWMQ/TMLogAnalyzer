@@ -22,6 +22,8 @@
 		BA1CF37A25C7ECC50045A719 /* logSelectView.m in Sources */ = {isa = PBXBuildFile; fileRef = BA1CF37825C7ECC50045A719 /* logSelectView.m */; };
 		BA1CF37B25C7ECC50045A719 /* logSelectView.xib in Resources */ = {isa = PBXBuildFile; fileRef = BA1CF37925C7ECC50045A719 /* logSelectView.xib */; };
 		BA1CF3AC25C8043A0045A719 /* logManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BA1CF3AB25C8043A0045A719 /* logManager.m */; };
+		BA3916B625ED353F00D39E43 /* libLuaScriptCore-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BA3916B525ED353F00D39E43 /* libLuaScriptCore-OSX.a */; };
+		BA3916C725ED366C00D39E43 /* sub_test.lua in Resources */ = {isa = PBXBuildFile; fileRef = BA3916C625ED366C00D39E43 /* sub_test.lua */; };
 		BAF43EC525D2563200478634 /* SequenceGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = BAF43EC425D2563200478634 /* SequenceGroup.m */; };
 		BAF43EC825D25A4800478634 /* RegexKitLite.m in Sources */ = {isa = PBXBuildFile; fileRef = BAF43EC625D25A4800478634 /* RegexKitLite.m */; };
 		BAF43F0425D3F2D200478634 /* logScrollViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BAF43F0225D3F2D200478634 /* logScrollViewController.m */; };
@@ -77,6 +79,21 @@
 		BA1CF37925C7ECC50045A719 /* logSelectView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = logSelectView.xib; sourceTree = "<group>"; };
 		BA1CF3AA25C8043A0045A719 /* logManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = logManager.h; sourceTree = "<group>"; };
 		BA1CF3AB25C8043A0045A719 /* logManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = logManager.m; sourceTree = "<group>"; };
+		BA3916B525ED353F00D39E43 /* libLuaScriptCore-OSX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libLuaScriptCore-OSX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BA3916B925ED364A00D39E43 /* LSCPointer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSCPointer.h; sourceTree = "<group>"; };
+		BA3916BA25ED364A00D39E43 /* LSCExportTypeAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSCExportTypeAnnotation.h; sourceTree = "<group>"; };
+		BA3916BB25ED364A00D39E43 /* LSCTypeDefinied.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSCTypeDefinied.h; sourceTree = "<group>"; };
+		BA3916BC25ED364A00D39E43 /* LSCFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSCFunction.h; sourceTree = "<group>"; };
+		BA3916BD25ED364A00D39E43 /* LSCExportType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSCExportType.h; sourceTree = "<group>"; };
+		BA3916BE25ED364A00D39E43 /* LSCExportTypeDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSCExportTypeDescriptor.h; sourceTree = "<group>"; };
+		BA3916BF25ED364A00D39E43 /* LSCTuple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSCTuple.h; sourceTree = "<group>"; };
+		BA3916C025ED364A00D39E43 /* LSCManagedValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSCManagedValue.h; sourceTree = "<group>"; };
+		BA3916C125ED364A00D39E43 /* LSCContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSCContext.h; sourceTree = "<group>"; };
+		BA3916C225ED364A00D39E43 /* LSCValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSCValue.h; sourceTree = "<group>"; };
+		BA3916C325ED364A00D39E43 /* LuaScriptCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LuaScriptCore.h; sourceTree = "<group>"; };
+		BA3916C425ED364A00D39E43 /* LSCExportMethodDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSCExportMethodDescriptor.h; sourceTree = "<group>"; };
+		BA3916C525ED364A00D39E43 /* LSCExportPropertyDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSCExportPropertyDescriptor.h; sourceTree = "<group>"; };
+		BA3916C625ED366C00D39E43 /* sub_test.lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sub_test.lua; sourceTree = "<group>"; };
 		BAF43EC325D2563200478634 /* SequenceGroup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SequenceGroup.h; sourceTree = "<group>"; };
 		BAF43EC425D2563200478634 /* SequenceGroup.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SequenceGroup.m; sourceTree = "<group>"; };
 		BAF43EC625D25A4800478634 /* RegexKitLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RegexKitLite.m; sourceTree = "<group>"; };
@@ -93,6 +110,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BA3916B625ED353F00D39E43 /* libLuaScriptCore-OSX.a in Frameworks */,
 				BA1CF1D425BED7A30045A719 /* MMTabBarView.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -142,6 +160,8 @@
 				BA1CF37325C7EC710045A719 /* logSelectView */,
 				BA1CF1C825BEA7860045A719 /* logDetailView */,
 				BA1CF27025C29A700045A719 /* logAnalyzer */,
+				BA3916B725ED35E000D39E43 /* LuaAPI */,
+				BA3916B825ED361500D39E43 /* LuaScript */,
 				BA1CF10E25BAAE730045A719 /* AppDelegate.h */,
 				BA1CF10F25BAAE730045A719 /* AppDelegate.m */,
 				BA1CF11125BAAE740045A719 /* Assets.xcassets */,
@@ -174,6 +194,7 @@
 		BA1CF19725BEA1120045A719 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				BA3916B525ED353F00D39E43 /* libLuaScriptCore-OSX.a */,
 				BA1CF19825BEA1120045A719 /* MMTabBarView.framework */,
 			);
 			name = Frameworks;
@@ -221,6 +242,34 @@
 				BA1CF37925C7ECC50045A719 /* logSelectView.xib */,
 			);
 			path = logSelectView;
+			sourceTree = "<group>";
+		};
+		BA3916B725ED35E000D39E43 /* LuaAPI */ = {
+			isa = PBXGroup;
+			children = (
+				BA3916C125ED364A00D39E43 /* LSCContext.h */,
+				BA3916C425ED364A00D39E43 /* LSCExportMethodDescriptor.h */,
+				BA3916C525ED364A00D39E43 /* LSCExportPropertyDescriptor.h */,
+				BA3916BD25ED364A00D39E43 /* LSCExportType.h */,
+				BA3916BA25ED364A00D39E43 /* LSCExportTypeAnnotation.h */,
+				BA3916BE25ED364A00D39E43 /* LSCExportTypeDescriptor.h */,
+				BA3916BC25ED364A00D39E43 /* LSCFunction.h */,
+				BA3916C025ED364A00D39E43 /* LSCManagedValue.h */,
+				BA3916B925ED364A00D39E43 /* LSCPointer.h */,
+				BA3916BF25ED364A00D39E43 /* LSCTuple.h */,
+				BA3916BB25ED364A00D39E43 /* LSCTypeDefinied.h */,
+				BA3916C225ED364A00D39E43 /* LSCValue.h */,
+				BA3916C325ED364A00D39E43 /* LuaScriptCore.h */,
+			);
+			path = LuaAPI;
+			sourceTree = "<group>";
+		};
+		BA3916B825ED361500D39E43 /* LuaScript */ = {
+			isa = PBXGroup;
+			children = (
+				BA3916C625ED366C00D39E43 /* sub_test.lua */,
+			);
+			path = LuaScript;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -337,6 +386,7 @@
 				BAF43F0525D3F2D200478634 /* logScrollViewController.xib in Resources */,
 				BA1CF11225BAAE740045A719 /* Assets.xcassets in Resources */,
 				BA1CF1CD25BEA7B80045A719 /* logDetailView.xib in Resources */,
+				BA3916C725ED366C00D39E43 /* sub_test.lua in Resources */,
 				BA1CF11525BAAE740045A719 /* MainMenu.xib in Resources */,
 				BA1CF37B25C7ECC50045A719 /* logSelectView.xib in Resources */,
 			);

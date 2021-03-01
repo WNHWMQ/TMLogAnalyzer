@@ -7,6 +7,7 @@
 //
 
 #import "logHandler.h"
+
 //log file type
 #define pivot           @"pivot.csv"
 #define FAIL_Summary    @"FAIL_Summary.csv"
@@ -31,6 +32,7 @@
 {
     self = [super init];
     if (self) {
+        self.context = [[LSCContext alloc] init];
         fileManager = [[NSFileManager alloc]init];
         arrSubString = [[NSMutableArray alloc]init];
         fileName = [path lastPathComponent];
@@ -101,103 +103,21 @@
         NSLog(@"Can't analyze other file without sequencer.log!");
         return;
     }
-    
-    NSUInteger length;
-    NSUInteger location = 0;
-    NSString *subString = nil;
-    NSString *line = nil;
-    NSMutableString *groupStr = nil;
-    int add_len = 0;
-    NSString *line_break = nil;
-    BOOL firstFilterFlag = YES;
-    
-    
-    NSArray *arrGroup = [fileContent componentsMatchedByRegex:[NSString stringWithFormat:@"%@.+running test",timeTampType]];
-    if ([arrGroup count] != [pivotData count]) {
-        NSLog(@"Analyze sequence log error, indexs is different from pivot log");
-        return;
-    }
-    
-    data = [[NSMutableArray alloc]initWithCapacity:[arrGroup count]];
-    
-////    dispatch_group_t group = dispatch_group_create();
-////    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-//    for (int i = 0; i < [arrGroup count] - 1; i++) {
-//
-////        dispatch_group_enter(group);
-////        dispatch_async(queue, ^{
-//        NSLog(@"%d",i);
-//            NSString *begin = arrGroup[i];
-//            if ( (i+1) < [arrGroup count]) {
-//                NSString *end = arrGroup[i+1];
-//                NSString *regex = [NSString stringWithFormat:@"(%@[\\s|\\S]*%@)",begin,end];
-//                NSString *groupStr = [[fileContent stringByMatching:regex]stringByMatching:@"([\\s|\\S]*\n)"];
-//                SequenceGroup *sg =[[SequenceGroup alloc]initWithGroupStr:groupStr andSkipValue:[pivotData[i] valueForKey:@"result"]];
-//                [data addObject:sg];
-//            }
-////
-////            dispatch_group_leave(group);
-////        });
-//    }
-////    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
-    
-//    if ([arrGroup count] > 0) {
-//        NSString *lastGroupStr = [fileContent stringByMatching:[NSString stringWithFormat:@"(%@[\\s|\\S]*)",[arrGroup lastObject]]];
-//        [data addObject:[[SequenceGroup alloc]initWithGroupStr:lastGroupStr andSkipValue:[[pivotData lastObject] valueForKey:@"result"]]];
-//    }
-    
-    
-    
-    length = [fileContent length];
-
-    //过滤第一个running test之前的无效字符
-    NSString *regex = [NSString stringWithFormat:@"([\\s|\\S]*%@)",[fileContent stringByMatching:arrGroup[0]]];
-    location = [[[fileContent stringByMatching:regex]stringByMatching:@"([\\s|\\S]*\n)"] length];
-
-    for (int i = 0; i < [arrGroup count]; i++) {
-//        NSLog(@"%d",i);
-        @autoreleasepool {
-            groupStr = [[NSMutableString alloc]init];
-
-            while (location < length) {
-
-                subString = [fileContent substringFromIndex:location];
-                line = [subString stringByMatching:@".*"];
-
-                if (([subString length] >= [line length] + 2) && [[subString substringToIndex:[line length]+2] containsString:[NSString stringWithFormat:@"%@\r\n",line]]){
-                    //            [line appendString:@"\r\n"];
-                    add_len = 2;
-                    line_break = @"\r\n";
-                }else if (([subString length] >= [line length] + 1) && [[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\n",line]]){
-                    //            [line appendString:@"\n"];
-                    add_len = 1;
-                    line_break = @"\n";
-                }else if (([subString length] >= [line length] + 1) && [[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\r",line]]){
-                    //            [line appendString:@"\r"];
-                    add_len = 1;
-                    line_break = @"\r";
-                }
-
-                if (i + 1 < [arrGroup count]) {
-                    if ([line containsString:arrGroup[i + 1]]) {//非最后一组时搜索下一组的时间戳
-                        [data addObject:[[SequenceGroup alloc]initWithGroupStr:groupStr andSkipValue:[pivotData[i] valueForKey:@"result"]]];
-                        [groupStr setString:@""];
-                        break;
-                    }
-                }else{//最后一组时通过剩余subString初始化
-                    [data addObject:[[SequenceGroup alloc]initWithGroupStr:subString andSkipValue:[[pivotData lastObject] valueForKey:@"result"]]];
-                    break;
-                }
-
-                [groupStr appendFormat:@"%@%@",line,line_break];
-
-                location = location + [line length] + add_len;
-            }
+    data = [[NSMutableArray alloc]init];
+    @autoreleasepool {
+        [self.context evalScriptFromFile:[[NSBundle mainBundle] pathForResource:@"sub_test" ofType:@"lua"]];
+        
+        LSCValue *value = [self.context callMethodWithName:@"getSequenceGroupStr"
+                                                 arguments:@[[LSCValue stringValue:fileContent]]];
+        NSArray *arrGroup = [value toArray];
+        if ([arrGroup count] != [pivotData count]) {
+            NSLog(@"Analyze sequence log error, indexs is different from pivot log");
+            return;
+        }
+        for (int i = 0; i < [pivotData count]; i++) {
+            [data addObject:[[SequenceGroup alloc]initWithGroupStr:arrGroup[i] andSkipValue:[pivotData[i] valueForKey:@"result"]]];
         }
     }
-    
-    
-    
 }
 
 //通过特殊字符索引

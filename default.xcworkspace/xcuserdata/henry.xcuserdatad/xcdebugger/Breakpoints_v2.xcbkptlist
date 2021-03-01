@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MainUI/MainUI/logAnalyzer/logHandler.m"
-            timestampString = "636284628.4742711"
+            timestampString = "636304916.322372"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "312"
-            endingLineNumber = "312"
+            startingLineNumber = "310"
+            endingLineNumber = "310"
             landmarkName = "-initCommonLogSubString:"
             landmarkType = "7">
          </BreakpointContent>
@@ -42,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MainUI/MainUI/logAnalyzer/logHandler.m"
-            timestampString = "636284628.474331"
+            timestampString = "636304916.322765"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "269"
-            endingLineNumber = "269"
+            startingLineNumber = "267"
+            endingLineNumber = "267"
             landmarkName = "-initSpecialLogSubString:fromStartStr:toEndStr:ignoreOption:"
             landmarkType = "7">
          </BreakpointContent>
@@ -58,7 +58,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MainUI/MainUI/AppDelegate.m"
-            timestampString = "636284628.474384"
+            timestampString = "636304916.323028"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "102"
@@ -74,11 +74,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MainUI/MainUI/logAnalyzer/logHandler.m"
-            timestampString = "636284628.474831"
+            timestampString = "636304916.323078"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "56"
-            endingLineNumber = "56"
+            startingLineNumber = "58"
+            endingLineNumber = "58"
             landmarkName = "-initWithFilePath:andTypeController:"
             landmarkType = "7">
          </BreakpointContent>
@@ -90,11 +90,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MainUI/MainUI/logAnalyzer/logHandler.m"
-            timestampString = "636284628.474884"
+            timestampString = "636304916.323344"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "215"
-            endingLineNumber = "215"
+            startingLineNumber = "213"
+            endingLineNumber = "213"
             landmarkName = "-initSpecialLogSubString:fromStartStr:toEndStr:ignoreOption:"
             landmarkType = "7">
          </BreakpointContent>
@@ -106,11 +106,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MainUI/MainUI/logAnalyzer/logHandler.m"
-            timestampString = "636284628.47493"
+            timestampString = "636304916.3236001"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "218"
-            endingLineNumber = "218"
+            startingLineNumber = "216"
+            endingLineNumber = "216"
             landmarkName = "-initSpecialLogSubString:fromStartStr:toEndStr:ignoreOption:"
             landmarkType = "7">
          </BreakpointContent>
@@ -122,11 +122,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MainUI/MainUI/AppDelegate.m"
-            timestampString = "636284628.4749759"
+            timestampString = "636304916.323855"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "308"
-            endingLineNumber = "308"
+            startingLineNumber = "310"
+            endingLineNumber = "310"
             landmarkName = "-UpdateLogSubString:"
             landmarkType = "7">
          </BreakpointContent>
@@ -138,11 +138,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MainUI/MainUI/AppDelegate.m"
-            timestampString = "636284628.4753079"
+            timestampString = "636304916.3239"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "312"
-            endingLineNumber = "312"
+            startingLineNumber = "314"
+            endingLineNumber = "314"
             landmarkName = "-RefreshDetailView:"
             landmarkType = "7">
          </BreakpointContent>
@@ -154,11 +154,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MainUI/MainUI/AppDelegate.m"
-            timestampString = "636284628.475636"
+            timestampString = "636304916.3239419"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "250"
-            endingLineNumber = "250"
+            startingLineNumber = "252"
+            endingLineNumber = "252"
             landmarkName = "-QuickSort:withLeftIndex:andRightIndex:"
             landmarkType = "7">
          </BreakpointContent>
@@ -170,11 +170,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MainUI/MainUI/AppDelegate.m"
-            timestampString = "636284628.47596"
+            timestampString = "636304916.323982"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "290"
-            endingLineNumber = "290"
+            startingLineNumber = "292"
+            endingLineNumber = "292"
             landmarkName = "-UpdateLogSubString:"
             landmarkType = "7">
          </BreakpointContent>
@@ -186,11 +186,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MainUI/MainUI/logAnalyzer/logHandler.m"
-            timestampString = "636284628.476329"
+            timestampString = "636304916.324021"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "462"
-            endingLineNumber = "462"
+            startingLineNumber = "460"
+            endingLineNumber = "460"
             landmarkName = "-getSubString:"
             landmarkType = "7">
          </BreakpointContent>
@@ -202,11 +202,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MainUI/MainUI/logAnalyzer/logHandler.m"
-            timestampString = "636284628.4763809"
+            timestampString = "636304916.32427"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "471"
-            endingLineNumber = "471"
+            startingLineNumber = "469"
+            endingLineNumber = "469"
             landmarkName = "-getSubString:"
             landmarkType = "7">
          </BreakpointContent>
@@ -218,12 +218,28 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "MainUI/MainUI/logAnalyzer/logHandler.m"
-            timestampString = "636284628.476428"
+            timestampString = "636304916.3245111"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "121"
-            endingLineNumber = "121"
+            startingLineNumber = "108"
+            endingLineNumber = "108"
             landmarkName = "-analyzeSequenceLog:"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "MainUI/MainUI/logAnalyzer/logManager.m"
+            timestampString = "636304916.324761"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "70"
+            endingLineNumber = "70"
+            landmarkName = "-initWithZipPath:"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
