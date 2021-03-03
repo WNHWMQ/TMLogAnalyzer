@@ -16,17 +16,23 @@
             <connections>
                 <outlet property="BottomView" destination="8jC-1i-pUW" id="1MS-Yt-V3j"/>
                 <outlet property="TopView" destination="pK2-qu-4mg" id="1Sc-bK-49M"/>
+                <outlet property="winLaunch" destination="bQC-NQ-g1J" id="tEQ-6E-I26"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="Bde-wc-1of"/>
             </connections>
         </customObject>
         <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
+        <customObject id="nKm-Ez-cKh" customClass="winDelegateLaunch">
+            <connections>
+                <outlet property="launchTextView" destination="dUc-AB-ql6" id="0Tj-WA-zsh"/>
+            </connections>
+        </customObject>
         <menu title="Main Menu" systemMenu="main" autoenablesItems="NO" id="AYu-sK-qS6">
             <items>
-                <menuItem title="MainUI" id="1Xt-HY-uBw">
+                <menuItem title="TMLogAnalyzer" id="1Xt-HY-uBw">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <menu key="submenu" title="MainUI" systemMenu="apple" id="uQy-DD-JDr">
+                    <menu key="submenu" title="TMLogAnalyzer" systemMenu="apple" id="uQy-DD-JDr">
                         <items>
-                            <menuItem title="About MainUI" id="5kV-Vb-QxS">
+                            <menuItem title="About TMLogAnalyzer" id="5kV-Vb-QxS">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="orderFrontStandardAboutPanel:" target="-1" id="Exp-CZ-Vem"/>
@@ -40,7 +46,7 @@
                                 <menu key="submenu" title="Services" systemMenu="services" id="hz9-B4-Xy5"/>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="4je-JR-u6R"/>
-                            <menuItem title="Hide MainUI" keyEquivalent="h" id="Olw-nP-bQN">
+                            <menuItem title="Hide TMLogAnalyzer" keyEquivalent="h" id="Olw-nP-bQN">
                                 <connections>
                                     <action selector="hide:" target="-1" id="PnN-Uc-m68"/>
                                 </connections>
@@ -58,7 +64,7 @@
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
-                            <menuItem title="Quit MainUI" keyEquivalent="q" id="4sb-4s-VLi">
+                            <menuItem title="Quit TMLogAnalyzer" keyEquivalent="q" id="4sb-4s-VLi">
                                 <connections>
                                     <action selector="terminate:" target="-1" id="Te7-pn-YzF"/>
                                 </connections>
@@ -673,9 +679,8 @@
             </items>
             <point key="canvasLocation" x="-288" y="-454"/>
         </menu>
-        <window title="MainUI" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="QvC-M9-y7g">
+        <window title="MainUI" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="QvC-M9-y7g">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
-            <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="335" y="390" width="1000" height="675"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
             <view key="contentView" id="EiT-Mj-1SZ">
@@ -709,5 +714,54 @@
             </view>
             <point key="canvasLocation" x="17" y="17"/>
         </window>
+        <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" hasShadow="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="bQC-NQ-g1J">
+            <rect key="contentRect" x="131" y="165" width="500" height="337.5"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="900"/>
+            <view key="contentView" id="KMv-ug-bBc">
+                <rect key="frame" x="0.0" y="0.0" width="500" height="338"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7ra-LS-aAO">
+                        <rect key="frame" x="-3" y="-3" width="506" height="344"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="axesIndependently" imageFrameStyle="grayBezel" image="Image" id="jjr-HR-dUr"/>
+                    </imageView>
+                    <scrollView fixedFrame="YES" borderType="none" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZpW-Dd-WhB">
+                        <rect key="frame" x="0.0" y="0.0" width="500" height="135"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <clipView key="contentView" ambiguous="YES" drawsBackground="NO" copiesOnScroll="NO" id="Zdz-aX-1PW">
+                            <rect key="frame" x="0.0" y="0.0" width="500" height="135"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <subviews>
+                                <textView ambiguous="YES" importsGraphics="NO" richText="NO" verticallyResizable="YES" spellingCorrection="YES" smartInsertDelete="YES" id="dUc-AB-ql6">
+                                    <rect key="frame" x="0.0" y="0.0" width="500" height="135"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                    <size key="minSize" width="500" height="135"/>
+                                    <size key="maxSize" width="500" height="10000000"/>
+                                    <color key="insertionPointColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                </textView>
+                            </subviews>
+                        </clipView>
+                        <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="m7i-bF-bmi">
+                            <rect key="frame" x="-100" y="-100" width="240" height="16"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                        <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="XZw-9v-COu">
+                            <rect key="frame" x="-100" y="-100" width="16" height="135"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                    </scrollView>
+                </subviews>
+            </view>
+            <connections>
+                <outlet property="delegate" destination="nKm-Ez-cKh" id="7WC-wa-EGQ"/>
+            </connections>
+            <point key="canvasLocation" x="17" y="615"/>
+        </window>
     </objects>
+    <resources>
+        <image name="Image" width="1200" height="847"/>
+    </resources>
 </document>

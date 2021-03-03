@@ -31,8 +31,6 @@
         
         FileManager = [[NSFileManager alloc] init];
         dicConfiguration = [[NSMutableDictionary alloc]init];
-//        TopViewRect = [TopView frame];
-//        BottomViewRect = [BottomView frame];
         NSString* resourcePath = [[NSBundle bundleForClass:[self class]] resourcePath];
         configFilePath = [[NSString alloc] initWithFormat:@"%@/Config.plist",resourcePath];
         [self LoadConfig:configFilePath];
@@ -99,7 +97,7 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // Insert code here to initialize your application
-    [_window center];
+    [self openZipFile:nil];
 }
 
 
@@ -108,7 +106,7 @@
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender{
-    return YES;
+    return NO;
 }
 
 -(void)ReplaceView:(NSView *)oldView with:(NSView *)newView
@@ -127,59 +125,85 @@
     [task launch];
 }
 
+//打开新的Zip文件 command + O
 - (IBAction)openZipFile:(NSMenuItem *)sender {
     
     NSString *zipPath = nil;
-    NSOpenPanel * panel = [NSOpenPanel openPanel];
-    [panel setDirectoryURL:[NSURL fileURLWithPath:[dicConfiguration valueForKey:Key_ZipLogPath] isDirectory:YES]];
-    [panel setCanChooseDirectories:NO];
-    [panel setCanCreateDirectories:NO];
-    [panel setCanChooseFiles:YES];
-    [panel setAllowsMultipleSelection:NO];
-    [panel setAllowedFileTypes:@[@"zip"]];
-    [panel setMessage:@"Please select log file"];
-    panel.prompt = @"Choose";
-    if ([panel runModal] == NSModalResponseOK) {
-        zipPath = [[NSString alloc]initWithString:[panel.URL path]];
-    }
+    NSOpenPanel *panelOpenZipFile = [NSOpenPanel openPanel];
+    [panelOpenZipFile setDirectoryURL:[NSURL fileURLWithPath:[dicConfiguration valueForKey:Key_ZipLogPath] isDirectory:YES]];
+    [panelOpenZipFile setCanChooseDirectories:NO];
+    [panelOpenZipFile setCanCreateDirectories:NO];
+    [panelOpenZipFile setCanChooseFiles:YES];
+    [panelOpenZipFile setAllowsMultipleSelection:NO];
+    [panelOpenZipFile setAllowedFileTypes:@[@"zip"]];
+    [panelOpenZipFile setMessage:@"Please select log file"];
+    panelOpenZipFile.prompt = @"Choose";
     
-    if (log_manager) {
-        [log_manager dealloc];
-    }
+    if ([panelOpenZipFile runModal] == NSModalResponseOK) {
+        zipPath = [[NSString alloc]initWithString:[panelOpenZipFile.URL path]];
+        
+        [panelOpenZipFile close];
+        [[NSRunLoop currentRunLoop]runMode:NSDefaultRunLoopMode beforeDate:[NSDate date]];
+        [[NSRunLoop currentRunLoop]runMode:NSDefaultRunLoopMode beforeDate:[NSDate date]];
+        
+        dispatch_queue_t serialQueue = dispatch_queue_create("serialQueue", DISPATCH_QUEUE_SERIAL);
+        dispatch_async(serialQueue, ^{
+            dispatch_async(dispatch_get_main_queue(), ^{
+                
+                winDelegateLaunch *launch = (winDelegateLaunch *)[winLaunch delegate];
+                [launch ClearLog];
+                
+                [winLaunch orderFront:nil];
+                [[NSRunLoop currentRunLoop]runMode:NSDefaultRunLoopMode beforeDate:[NSDate date]];
+                
+                NSDictionary *dic = [NSDictionary dictionaryWithObjectsAndKeys:@"TMLogAnalyzer 启动...",kStartupMsg,[NSNumber numberWithInt:MSG_LEVEL_NORMAL],kStartupLevel, nil];
+                [[NSNotificationCenter defaultCenter]postNotificationName:kNotificationStartupLog object:nil userInfo:dic];
+                
+                if (log_manager) {
+                    [log_manager dealloc];
+                }
 
-    if (logDetailViewController) {
-//        [logDetailViewController dealloc];
+                if (logDetailViewController) {
+//                    [logDetailViewController dealloc];
+                }
+
+                if (logSelectViewController) {
+//                    [logSelectViewController dealloc];
+                }
+
+                log_manager = [[logManager alloc] initWithZipPath:zipPath];
+
+                if (log_manager) {
+
+                    [dicConfiguration setObject:zipPath forKey:Key_ZipLogPath];
+                    [self SaveConfig:configFilePath];
+
+                    //init log select view
+                    logSelectViewController = [[logSelectView alloc]initWithData:log_manager->logSelectHandlerDic];
+                    [self ReplaceView:TopView with:logSelectViewController.view];
+                    TopView = logSelectViewController.view;
+
+                    //init log detail view
+                    logDetailViewController = [[logDetailView alloc]init];
+                    [self ReplaceView:BottomView with:logDetailViewController.view];
+                    BottomView = logDetailViewController.view;
+
+                    logHandler *lh;
+                    for (NSString *key in log_manager->logDetailHandlerDic) {
+                        lh = [log_manager->logDetailHandlerDic valueForKey:key];
+                        [logDetailViewController NewLogView:lh->logType withContent:lh->fileContent];
+                    }
+                }
+                
+                [NSThread sleepForTimeInterval:3];
+                
+                [winLaunch orderOut:nil];
+                [[NSRunLoop currentRunLoop]runMode:NSDefaultRunLoopMode beforeDate:[NSDate date]];
+                [_window center];
+                [_window makeKeyAndOrderFront:nil];
+            });
+        });
     }
-    
-    if (logSelectViewController) {
-        [logSelectViewController dealloc];
-    }
-    
-    log_manager = [[logManager alloc] initWithZipPath:zipPath];
-    
-    if (log_manager) {
-        
-        [dicConfiguration setObject:zipPath forKey:Key_ZipLogPath];
-        [self SaveConfig:configFilePath];
-        
-        //init log select view
-        logSelectViewController = [[logSelectView alloc]initWithData:log_manager->logSelectHandlerDic];
-        [self ReplaceView:TopView with:logSelectViewController.view];
-        TopView = logSelectViewController.view;
-        
-        //init log detail view
-        logDetailViewController = [[logDetailView alloc]init];
-        [self ReplaceView:BottomView with:logDetailViewController.view];
-        BottomView = logDetailViewController.view;
-        
-        logHandler *lh;
-        for (NSString *key in log_manager->logDetailHandlerDic) {
-            lh = [log_manager->logDetailHandlerDic valueForKey:key];
-            [logDetailViewController NewLogView:lh->logType withContent:lh->fileContent];
-        }
-    }
-    
-    [zipPath release];
 }
 
 //打开新的log文件 command + T
@@ -219,7 +243,9 @@
 
 //关闭log文件 command + W
 - (IBAction)closeTab:(id)sender {
-    [logDetailViewController closeTab:sender];
+    if (log_manager) {
+        [logDetailViewController closeTab:sender];
+    }
 }
 
 - (void)showAlertMessageBox:(NSNotification *)note{

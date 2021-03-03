@@ -76,9 +76,10 @@
     if ([[dicLogTextView allKeys]containsObject:logType]) {
         NSLog(@"%@ 已存在!",logType);
         return;
+    }else{
+        [self addNewTabWithTitle:logType];
+        [self RefreshLogView:logType withContent:content];
     }
-    [self addNewTabWithTitle:logType];
-    [self RefreshLogView:logType withContent:content];
 }
 
 - (void)addNewTabWithTitle:(NSString *)aTitle {

@@ -24,6 +24,7 @@
 		BA1CF3AC25C8043A0045A719 /* logManager.m in Sources */ = {isa = PBXBuildFile; fileRef = BA1CF3AB25C8043A0045A719 /* logManager.m */; };
 		BA3916B625ED353F00D39E43 /* libLuaScriptCore-OSX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BA3916B525ED353F00D39E43 /* libLuaScriptCore-OSX.a */; };
 		BA3916C725ED366C00D39E43 /* sub_test.lua in Resources */ = {isa = PBXBuildFile; fileRef = BA3916C625ED366C00D39E43 /* sub_test.lua */; };
+		BAD5B37025EF714800F2B50C /* winDelegateLaunch.m in Sources */ = {isa = PBXBuildFile; fileRef = BAD5B36F25EF714800F2B50C /* winDelegateLaunch.m */; };
 		BAF43EC525D2563200478634 /* SequenceGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = BAF43EC425D2563200478634 /* SequenceGroup.m */; };
 		BAF43EC825D25A4800478634 /* RegexKitLite.m in Sources */ = {isa = PBXBuildFile; fileRef = BAF43EC625D25A4800478634 /* RegexKitLite.m */; };
 		BAF43F0425D3F2D200478634 /* logScrollViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BAF43F0225D3F2D200478634 /* logScrollViewController.m */; };
@@ -94,6 +95,8 @@
 		BA3916C425ED364A00D39E43 /* LSCExportMethodDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSCExportMethodDescriptor.h; sourceTree = "<group>"; };
 		BA3916C525ED364A00D39E43 /* LSCExportPropertyDescriptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LSCExportPropertyDescriptor.h; sourceTree = "<group>"; };
 		BA3916C625ED366C00D39E43 /* sub_test.lua */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = sub_test.lua; sourceTree = "<group>"; };
+		BAD5B36E25EF714800F2B50C /* winDelegateLaunch.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = winDelegateLaunch.h; sourceTree = "<group>"; };
+		BAD5B36F25EF714800F2B50C /* winDelegateLaunch.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = winDelegateLaunch.m; sourceTree = "<group>"; };
 		BAF43EC325D2563200478634 /* SequenceGroup.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SequenceGroup.h; sourceTree = "<group>"; };
 		BAF43EC425D2563200478634 /* SequenceGroup.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SequenceGroup.m; sourceTree = "<group>"; };
 		BAF43EC625D25A4800478634 /* RegexKitLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RegexKitLite.m; sourceTree = "<group>"; };
@@ -164,6 +167,8 @@
 				BA3916B825ED361500D39E43 /* LuaScript */,
 				BA1CF10E25BAAE730045A719 /* AppDelegate.h */,
 				BA1CF10F25BAAE730045A719 /* AppDelegate.m */,
+				BAD5B36E25EF714800F2B50C /* winDelegateLaunch.h */,
+				BAD5B36F25EF714800F2B50C /* winDelegateLaunch.m */,
 				BA1CF11125BAAE740045A719 /* Assets.xcassets */,
 				BA1CF11325BAAE740045A719 /* MainMenu.xib */,
 				BA1CF11625BAAE740045A719 /* Info.plist */,
@@ -424,6 +429,7 @@
 				BA1CF1CC25BEA7B80045A719 /* logDetailView.m in Sources */,
 				BA1CF27625C29AB00045A719 /* logTypeController.m in Sources */,
 				BAF43EC825D25A4800478634 /* RegexKitLite.m in Sources */,
+				BAD5B37025EF714800F2B50C /* winDelegateLaunch.m in Sources */,
 				BA1CF27325C29A9D0045A719 /* logHandler.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

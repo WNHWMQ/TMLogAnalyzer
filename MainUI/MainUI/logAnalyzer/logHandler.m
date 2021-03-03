@@ -34,7 +34,7 @@
     if (self) {
         self.context = [[LSCContext alloc] init];
         fileManager = [[NSFileManager alloc]init];
-        arrSubString = [[NSMutableArray alloc]init];
+//        arrSubString = [[NSMutableArray alloc]init];
         fileName = [path lastPathComponent];
         
         if ([fileManager fileExistsAtPath:path] && [typeController isValidLogType:fileName]) {
@@ -49,9 +49,11 @@
             
             if ([typeController isValidTimeTampType:fileContent withLogType:logType]) {
                 timeTampType = [typeController getTimeTampType:fileContent withLogType:logType];
+                lua_TimeTampType = [typeController getLuaTimeTampType:timeTampType];
                 msPrecisionLength = [TimeTamp measure_msPrecisionLength:fileContent withTimeTampType:timeTampType];
             }else{
                 timeTampType = nil;
+                lua_TimeTampType = nil;
             }
             
             if ([logType containsString:pivot] || [logType containsString:FAIL_Summary]) {
@@ -97,26 +99,67 @@
 }
 
 //按时间戳及"runing test"字符串，分组解析sequence.log数据
-- (void)analyzeSequenceLog:(NSArray *)pivotData
+- (void)analyzeSequenceLog:(NSArray *)pivotData withMatchStr:(NSString *)match_str
 {
     if (![fileName containsString:sequencer]) {
-        NSLog(@"Can't analyze other file without sequencer.log!");
+//        NSLog(@"Can't analyze other file without sequencer.log!");
+        [self sendLaunchMessage:@"Can't analyze other file without sequencer.log!" Level:MSG_LEVEL_ERROR];
         return;
     }
+    
+    if ([pivotData count] < 1 || [match_str length] < 1) {
+//        NSLog(@"Function <analyzeSequenceLog> Illegal parameter");
+        [self sendLaunchMessage:@"Function <analyzeSequenceLog> Illegal parameter" Level:MSG_LEVEL_ERROR];
+        return;
+    }
+    
     data = [[NSMutableArray alloc]init];
     @autoreleasepool {
         [self.context evalScriptFromFile:[[NSBundle mainBundle] pathForResource:@"sub_test" ofType:@"lua"]];
         
         LSCValue *value = [self.context callMethodWithName:@"getSequenceGroupStr"
-                                                 arguments:@[[LSCValue stringValue:fileContent]]];
+                                                 arguments:@[[LSCValue stringValue:[fileContent stringByReplacingOccurrencesOfString:@"\0"
+                                                                                                                          withString:@""]],
+                                                             [LSCValue stringValue:match_str]]];
         NSArray *arrGroup = [value toArray];
         if ([arrGroup count] != [pivotData count]) {
-            NSLog(@"Analyze sequence log error, indexs is different from pivot log");
+//            NSLog(@"Analyze sequence log error, indexs is different from pivot log");
+            [self sendLaunchMessage:@"Analyze sequence log error, indexs is different from pivot log" Level:MSG_LEVEL_ERROR];
             return;
         }
         for (int i = 0; i < [pivotData count]; i++) {
             [data addObject:[[SequenceGroup alloc]initWithGroupStr:arrGroup[i] andSkipValue:[pivotData[i] valueForKey:@"result"]]];
         }
+    }
+}
+
+- (void)initSpecialLogSubString:(NSArray *)arr withMatchStr:(NSString *)match_str ignoreOption:(NSArray *)optArr
+{
+    if ([arr count] < 1 || [match_str length] < 1) {
+//        NSLog(@"Function <initSpecialLogSubString> Illegal parameter");
+        [self sendLaunchMessage:@"Function <initSpecialLogSubString> Illegal parameter" Level:MSG_LEVEL_ERROR];
+        return;
+    }
+    
+    @autoreleasepool{
+        [self.context evalScriptFromFile:[[NSBundle mainBundle] pathForResource:@"sub_test" ofType:@"lua"]];
+        
+        NSMutableArray *skipArr = [[NSMutableArray alloc]init];
+        for (int i = 0; i < [arr count]; i++) {
+            if (allowSkip && ((SequenceGroup *)arr[i])->skipValue) {
+                [skipArr addObject:@"skip"];
+            }else{
+                [skipArr addObject:@"test"];
+            }
+        }
+        
+        LSCValue *value = [self.context callMethodWithName:@"getSpecialGroupStr"
+                                                 arguments:@[[LSCValue stringValue:[fileContent stringByReplacingOccurrencesOfString:@"\0"
+                                                                                                                        withString:@""]],
+                                                             [LSCValue stringValue:match_str],
+                                                             [LSCValue arrayValue:skipArr],
+                                                             [LSCValue arrayValue:optArr]]];
+        arrSubString = [[NSMutableArray alloc]initWithArray:[value toArray]];
     }
 }
 
@@ -131,6 +174,7 @@
     BOOL ignoreFlag = NO;
     NSString *line_break = nil;
     int add_len = 0;
+    arrSubString = [[NSMutableArray alloc]init];
     
     for (int i = 0; i < [arr count]; i++) {
         
@@ -191,96 +235,71 @@
 }
 
 //通过时间戳索引
-- (void)initCommonLogSubString:(NSArray *)arr
+- (void)initCommonLogSubString:(NSArray *)arr withLuaTimeTampType:(NSString *)time_regex
 {
-    NSArray *arrGroup = [fileContent componentsMatchedByRegex:timeTampType];
-    
-    NSUInteger length;
-    NSUInteger location = 0;
-    NSMutableString *retString = nil;
-    NSString *subString = nil;
-    NSString *line = nil;
-    TimeTamp *tempTp = nil;
-    BOOL ignoreTimeTampFlag = NO;
-    NSString *line_break = nil;
-    int add_len = 0;
-    
-    for (int i = 0; i < [arr count]; i++) {
-        TimeTamp *sub_tp1 = [[TimeTamp alloc]initWithString:((SequenceGroup *)arr[i])->startTime
+    @autoreleasepool {
+        [self.context evalScriptFromFile:[[NSBundle mainBundle] pathForResource:@"sub_test" ofType:@"lua"]];
+        LSCValue *value = [self.context callMethodWithName:@"getCommonGroupStr"
+                                                 arguments:@[[LSCValue stringValue:[fileContent stringByReplacingOccurrencesOfString:@"\0"
+                                                                                                                        withString:@""]],
+                                                             [LSCValue stringValue:time_regex]]];
+        
+        NSArray *arrGroup = [value toArray];    //arrGroup[x][0]:timeTamp   arrGroup[x][1]:groupStr
+        NSMutableString *retString = nil;
+        NSString *subString = nil;
+        TimeTamp *tempTp = nil;
+        int Index = 0;
+        arrSubString = [[NSMutableArray alloc]init];
+        
+        for (int i = 0; i < [arr count]; i++) {
+            TimeTamp *sub_tp1 = [[TimeTamp alloc]initWithString:((SequenceGroup *)arr[i])->startTime
+                                              msPrecisionLength:msPrecisionLength
+                                                    integerType:@"DOWN"];
+            TimeTamp *sub_tp2 = [[TimeTamp alloc]initWithString:((SequenceGroup *)arr[i])->endTime
+                                              msPrecisionLength:msPrecisionLength
+                                                    integerType:@"UP"];
+            
+            TimeTamp *tp1 = [[TimeTamp alloc]initWithString:arrGroup[0][0]
                                           msPrecisionLength:msPrecisionLength
-                                                integerType:@"DOWN"];
-        TimeTamp *sub_tp2 = [[TimeTamp alloc]initWithString:((SequenceGroup *)arr[i])->endTime
+                                                integerType:@"DEFAULT"];
+            TimeTamp *tp2 = [[TimeTamp alloc]initWithString:[arrGroup lastObject][0]
                                           msPrecisionLength:msPrecisionLength
-                                                integerType:@"UP"];
-        
-        TimeTamp *tp1 = [[TimeTamp alloc]initWithString:arrGroup[0]
-                                      msPrecisionLength:msPrecisionLength
-                                            integerType:@"DEFAULT"];
-        TimeTamp *tp2 = [[TimeTamp alloc]initWithString:[arrGroup lastObject]
-                                      msPrecisionLength:msPrecisionLength
-                                            integerType:@"DEFAULT"];
-        
-        if ([tp1 isLaterThanTimeTamp:sub_tp2] || [tp2 isBeforeThanTimeTamp:sub_tp1]) {
-            [arrSubString addObject:@""];
-            continue;
-        }
-        
-        length = [fileContent length];
-        retString = [[NSMutableString alloc]init];
-        
-        @autoreleasepool {
-            while (location < length) {
+                                                integerType:@"DEFAULT"];
+            
+            if ([tp1 isLaterThanTimeTamp:sub_tp2] || [tp2 isBeforeThanTimeTamp:sub_tp1]) {
+                [arrSubString addObject:@""];
+                continue;
+            }
+            
+            retString = [[NSMutableString alloc]init];
+            while (Index < [arrGroup count]) {
                 
-                subString = [fileContent substringFromIndex:location];
-                line = [subString stringByMatching:@".*"];
+                subString = arrGroup[Index][1];
                 
-                if (([subString length] >= [line length] + 2) && [[subString substringToIndex:[line length]+2] containsString:[NSString stringWithFormat:@"%@\r\n",line]]){
-                    //                [line appendString:@"\r\n"];
-                    add_len = 2;
-                    line_break = @"\r\n";
-                }else if (([subString length] >= [line length] + 1) && [[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\n",line]]){
-                    //                [line appendString:@"\n"];
-                    add_len = 1;
-                    line_break = @"\n";
-                }else if (([subString length] >= [line length] + 1) && [[subString substringToIndex:[line length]+1] containsString:[NSString stringWithFormat:@"%@\r",line]]){
-                    //                [line appendString:@"\r"];
-                    add_len = 1;
-                    line_break = @"\r";
-                }
-                
-                tempTp = [[TimeTamp alloc]initWithString:[line stringByMatching:timeTampType]
+                tempTp = [[TimeTamp alloc]initWithString:arrGroup[Index][0]
                                        msPrecisionLength:msPrecisionLength
                                              integerType:@"DEFAULT"];
                 if(tempTp != nil){
                     if([tempTp isLaterThanTimeTamp:sub_tp2]){
-                        ignoreTimeTampFlag = NO;
                         break;
                     }else{
-                        
-                        [retString appendFormat:@"%@%@",line,line_break];
-                        ignoreTimeTampFlag = YES;
+                        [retString appendFormat:@"%@",subString];
                     }
                 }
                 
-                if (ignoreTimeTampFlag && tempTp == nil) {
-                    [retString appendFormat:@"%@%@",line,line_break];
-                }
-                
-                location = location + [line length] + add_len;
-                
                 [tempTp release];
-                //            [line release];
-                //            [subString release];
+                
+                Index++;
             }
+            [arrSubString addObject:retString];
+            
+            [tp1 release];
+            [tp2 release];
+            [sub_tp1 release];
+            [sub_tp2 release];
         }
-        
-        [arrSubString addObject:retString];
-        
-        [tp1 release];
-        [tp2 release];
-        [sub_tp1 release];
-        [sub_tp2 release];
     }
+    
 }
 
 //- (NSString *)subString:(NSString *)content withTimeTampArr:(NSArray *)arr
@@ -393,6 +412,13 @@
 
 }
 
+- (void)sendLaunchMessage:(NSString *)msg Level:(int)level
+{
+    NSLog(@"%@",msg);
+    NSDictionary *dic = [NSDictionary dictionaryWithObjectsAndKeys:msg,kStartupMsg,[NSNumber numberWithInt:level],kStartupLevel, nil];
+    [[NSNotificationCenter defaultCenter]postNotificationName:kNotificationStartupLog object:nil userInfo:dic];
+}
+
 - (NSMutableArray *)data{
     return data;
 }
@@ -407,6 +433,7 @@
     [fileContent release];
     [logType release];
     [timeTampType release];
+    [lua_TimeTampType release];
     [arrSubString removeAllObjects];
     [super dealloc];
 }

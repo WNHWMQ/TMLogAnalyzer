@@ -7,6 +7,7 @@
 //
 
 #import "logManager.h"
+#import "../winDelegateLaunch.h"
 
 //log file type
 #define pivot           @"pivot.csv"
@@ -26,7 +27,7 @@
 #define efi0_uart       @"efi0-uart.log"
 #define usbfs           @"usbfs.log"
 
-#define kShowAlertMessageBox    @"kShowAlertMessageBox"
+#define kShowAlertMessageBox            @"kShowAlertMessageBox"
 
 @implementation logManager
 
@@ -67,54 +68,60 @@
             
             
             //3.先初始化sequencer log获取时间戳等信息
-            [[logDetailHandlerDic valueForKey:sequencer] analyzeSequenceLog:[(logHandler *)[logSelectHandlerDic valueForKey:pivot] data]];
+            [self sendLaunchMessage:@"开始解析 Sequencer.log ..." Level:MSG_LEVEL_NORMAL];
+            lh = [logDetailHandlerDic valueForKey:sequencer];
+            [lh analyzeSequenceLog:[(logHandler *)[logSelectHandlerDic valueForKey:pivot] data]
+                      withMatchStr:[typeController getMatchStr:sequencer withTimeTampType:lh->timeTampType]];
+            [self sendLaunchMessage:@"结束解析 Sequencer.log ..." Level:MSG_LEVEL_NORMAL];
             
             
-            //多线程并发处理，将每个log拆分为string数组片段
-            //创建一个调度组
-            dispatch_group_t group = dispatch_group_create();
-            //获取全局并发队列
-            dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+//            //多线程并发处理，将每个log拆分为string数组片段
+//            //创建一个调度组
+//            dispatch_group_t group = dispatch_group_create();
+//            //获取全局并发队列
+//            dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
             
             for (NSString *key in logDetailHandlerDic) {
                 //手动添加一个任务到调度组
-                dispatch_group_enter(group);
-                
-                dispatch_async(queue, ^{
+//                dispatch_group_enter(group);
+//
+//                dispatch_async(queue, ^{
+//                    NSLog(@"线程 %@ 初始化 group data 开始",key);
+                    [self sendLaunchMessage:[NSString stringWithFormat:@"线程 %@ 初始化 group data 开始...",key] Level:MSG_LEVEL_NORMAL];
                     logHandler *lh_temp = [logDetailHandlerDic valueForKey:key];
-                    if ([key isEqualToString:EngineLog] || [key isEqualToString:engine]) {
-                        NSLog(@"线程 %@ 开始",key);
+                    if ([key isEqualToString:engine] || [key isEqualToString:flow_plain] || [key isEqualToString:EngineLog] || [key isEqualToString:sequencer]){
                         [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
-                                            fromStartStr:@"< Received >"
-                                                toEndStr:@"< Result >"
-                                            ignoreOption:@[@"start_test",@"end_test"]];
-                        NSLog(@"线程 %@ 结束",key);
-                    }else if ([key isEqualToString:flow_plain]){
-                        NSLog(@"线程 %@ 开始",key);
-                        [lh_temp initSpecialLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
-                                            fromStartStr:@"==Test:"
-                                                toEndStr:lh_temp->timeTampType
-                                            ignoreOption:@[]];
-                        NSLog(@"线程 %@ 结束",key);
-                        
+                                            withMatchStr:[typeController getMatchStr:key withTimeTampType:lh_temp->timeTampType]
+                                            ignoreOption:[typeController getIgnoreOption:key]];
                     }else{
-                        NSLog(@"线程 %@ 开始",key);
-                        [lh_temp initCommonLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]];
-                        NSLog(@"线程 %@ 结束",key);
+                        [lh_temp initCommonLogSubString:[(logHandler *)[logDetailHandlerDic valueForKey:sequencer] data]
+                                    withLuaTimeTampType:lh_temp->lua_TimeTampType];
                     }
+//                    NSLog(@"线程 %@ 初始化 group data 结束",key);
+                    [self sendLaunchMessage:[NSString stringWithFormat:@"线程 %@ 初始化 group data 结束...",key] Level:MSG_LEVEL_NORMAL];
                     //该任务执行完毕从调度组移除
-                    dispatch_group_leave(group);
-                });
+//                    dispatch_group_leave(group);
+//                });
             }
             
             //等待所有任务执行完毕 参数：1.对应的调度组 2.超时时间
-            dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
-            NSLog(@"全部任务结束!");
+//            dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+//            NSLog(@"全部任务结束!");
+            [self sendLaunchMessage:@"全部任务结束!" Level:MSG_LEVEL_NORMAL];
         }else{
             return nil;
         }
     }
     return self;
+}
+
+- (void)sendLaunchMessage:(NSString *)msg Level:(int)level
+{
+    NSLog(@"%@",msg);
+//    dispatch_async(dispatch_get_main_queue(), ^{
+        NSDictionary *dic = [NSDictionary dictionaryWithObjectsAndKeys:msg,kStartupMsg,[NSNumber numberWithInt:level],kStartupLevel, nil];
+        [[NSNotificationCenter defaultCenter]postNotificationName:kNotificationStartupLog object:nil userInfo:dic];
+//    });
 }
 
 //解压 zip log

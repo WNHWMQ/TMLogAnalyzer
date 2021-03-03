@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface logTypeController : NSObject{
     NSArray *logTypeList;
     NSArray *timeTampTypeList;
+    NSArray *lua_TimeTampTypeList;
 }
 
 - (BOOL)isValidLogType:(NSString *)fileName;
@@ -22,6 +23,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)getTimeTampType:(NSString *)content withLogType:(NSString *)logType;
 - (BOOL)isDetailViewLog:(NSString *)fileName;
 - (BOOL)isSelectViewLog:(NSString *)fileName;
+- (NSString *)getMatchStr:(NSString *)logType withTimeTampType:(NSString *)type;
+- (NSArray *)getIgnoreOption:(NSString *)logType;
+- (NSString *)getLuaTimeTampType:(NSString *)oc_timptamp;
 
 @end
 

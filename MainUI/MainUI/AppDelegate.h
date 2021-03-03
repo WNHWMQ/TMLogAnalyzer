@@ -14,6 +14,9 @@
 @interface AppDelegate : NSObject <NSApplicationDelegate>{
     IBOutlet NSView *TopView;
     IBOutlet NSView *BottomView;
+    IBOutlet NSWindow *winLaunch;
+    //    NSOpenPanel * panelOpenZipFile;
+//    BOOL panelIsOpenFlag;
     logDetailView *logDetailViewController;
     logSelectView *logSelectViewController;
     logManager *log_manager;
@@ -23,6 +26,7 @@
     NSString *configFilePath;
     NSMutableDictionary *dicConfiguration;
     NSFileManager* FileManager;
+//    NSString *currentZipPath;
 }
 @end
 
